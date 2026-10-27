@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ET312B</title>
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#f3f3ef; --card:#ffffff; --soft:#f1f1ed; --ink:#1c1e20; --muted:#666b72; --line:#dcdcd5;
+    --accent:#2a6f69; --accent-ink:#ffffff; --danger:#c62828; --danger-ink:#ffffff;
+    --warn-bg:#fff5e1; --warn-line:#e6b95f; --warn-ink:#6b4b00; --bad-bg:#fdecec; --bad-line:#dc8d8d; --ok:#2e7d32;
+    --cA:#2a6f69; --cB:#7a5c9e; --cM:#b0732a; --bar:#e4e4de; --shadow:0 1px 2px rgba(0,0,0,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141618; --card:#1e2124; --soft:#25292d; --ink:#e8e9ea; --muted:#9aa0a6; --line:#33383d;
+      --accent:#4fa39b; --accent-ink:#0b1514; --danger:#e53935; --warn-bg:#32290f; --warn-line:#8a6a1f; --warn-ink:#f1d9a0;
+      --bad-bg:#3a1c1c; --bad-line:#8a3a3a; --ok:#66bb6a; --cA:#4fa39b; --cB:#a58bd0; --cM:#d99a52; --bar:#2e3237; --shadow:none; }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  main{max-width:720px;margin:0 auto;padding:16px 16px 56px}
+  .hidden{display:none !important}
+  h1{font-size:22px;margin:0;letter-spacing:-.01em}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 12px}
+
+  .notice{font-size:13px;line-height:1.4;color:var(--warn-ink);background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:10px;padding:9px 12px;margin:0 0 12px}
+  .banner{background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn-ink);border-radius:10px;padding:10px 14px;margin:0 0 12px;font-size:14px}
+  .banner.bad{background:var(--bad-bg);border-color:var(--bad-line);color:var(--ink)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px;box-shadow:var(--shadow)}
+  .card-h{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+  .card-h h2{margin:0;font-size:16px;font-weight:650;flex:1}
+  .badge{width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:13px;font-weight:700;display:grid;place-items:center;flex:none}
+  .hint{font-size:13px;color:var(--muted);margin:12px 0 0}
+  .pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .pill.ok{color:var(--ok);border-color:var(--ok)} .pill.bad{color:var(--danger);border-color:var(--danger)}
+
+  .btn{font:inherit;font-size:15px;min-height:44px;padding:9px 16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);cursor:pointer}
+  .btn:hover:not(:disabled){border-color:var(--accent)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+  .btn.sm{min-height:34px;padding:4px 12px;font-size:13px}
+  .btn.wide{width:100%}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+  /* settings grid: label column + A / B / multi-adjust */
+  .sg{display:grid;grid-template-columns:minmax(88px,.95fr) repeat(3,minmax(0,1fr));gap:12px 10px;align-items:center}
+  .sg .h{font-size:13px;font-weight:650;display:flex;align-items:center;gap:6px;min-width:0}
+  .dot{width:10px;height:10px;border-radius:50%;flex:none}
+  .sg .l{font-size:14px;font-weight:600;line-height:1.25}
+  .sg .l small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+  .sg .na{font-size:12px;color:var(--muted);text-align:center;line-height:1.25}
+  .span2{grid-column:span 2}
+  .field{position:relative;display:block}
+  .field input{width:100%;font:inherit;font-size:18px;font-variant-numeric:tabular-nums;text-align:right;padding:9px 30px 9px 8px;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+  .field .u{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none}
+  .field.sec input{padding-right:38px}
+  .sep{grid-column:1 / -1;border-top:1px solid var(--line);margin:0}
+
+  /* run mode tiles */
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .mode{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--soft)}
+  .mode h3{margin:0;font-size:16px}
+  .mode p{margin:0;font-size:13px;color:var(--muted)}
+  .mode .push{margin-top:auto}
+  .mode label.inl{display:flex;align-items:center;gap:8px;font-size:14px}
+  .mode label.inl .field{width:110px}
+  .mode label.col{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+  .mode input[type=text]{width:100%;font:inherit;font-size:14px;padding:9px 10px;min-height:40px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+
+  /* live */
+  .stop{display:block;width:100%;min-height:68px;font:inherit;font-size:26px;font-weight:800;letter-spacing:.06em;color:var(--danger-ink);background:var(--danger);border:0;border-radius:12px;cursor:pointer}
+  .stop:disabled{opacity:.5;cursor:not-allowed}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:14px 0 0}
+  .tile{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--soft);display:flex;flex-direction:column;gap:2px}
+  .tile .t{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);font-weight:600}
+  .tile .t b{color:var(--ink)}
+  .tile .v{font-size:40px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+  .bar{height:10px;background:var(--bar);border-radius:6px;position:relative;overflow:hidden;margin:6px 0 4px}
+  .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;width:0}
+  .bar .mark{position:absolute;top:0;bottom:0;width:2px;background:var(--danger)}
+  .tile .sub{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .tile .btn{margin-top:8px;align-self:flex-start}
+  .panel{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+  .status{font-size:14px;margin:0}
+  .link{word-break:break-all;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
+  .req{background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn-ink);border-radius:10px;padding:12px;margin-top:10px}
+  .endrow{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+
+  details.card summary{cursor:pointer;color:var(--muted);font-size:14px}
+  #log{font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;max-height:220px;overflow:auto;white-space:pre-wrap;color:var(--muted);margin-top:10px}
+  .tgl{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:10px}
+
+  /* controller page */
+  .cbox{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--card);margin:12px 0}
+  .cbox .t{display:flex;justify-content:space-between;align-items:baseline;font-weight:650}
+  .cbox .v{font-size:52px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+  .cbox input[type=range]{width:100%;height:48px;accent-color:var(--accent);margin:6px 0}
+  .cbox .row{justify-content:space-between}
+  .cbtns{display:flex;gap:10px}
+  .cbtns .btn{min-width:84px;min-height:48px;font-size:17px}
+
+  @media (max-width:560px){
+    main{padding:12px 12px 48px}
+    .modes{grid-template-columns:1fr}
+    .sg{grid-template-columns:minmax(76px,.9fr) repeat(3,minmax(0,1fr));gap:12px 8px}
+    .field input{font-size:17px;padding-left:4px}
+    .full{display:none}
+    .tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .tile{padding:10px 9px}
+    .tile .v{font-size:28px}
+    .tile .btn{align-self:stretch;padding:4px 6px}
+  }
+</style>
+</head>
+<body>
+<main>
+
+<!-- ================= HOST VIEW (the PC with the cable) ================= -->
+<div id="hostView">
+  <div class="top"><h1>ET312B</h1><span id="connState" class="pill">not connected</span></div>
+  <div class="notice"><b>While running, this page controls the box, not the knobs.</b> If the page or the PC stops, the box keeps its <b>last level</b> &mdash; switch it off. Limits are enforced by this page only.</div>
+  <div id="faultBanner" class="banner bad hidden"></div>
+  <div id="noteBanner" class="banner hidden"></div>
+
+  <section class="card" id="cardConnect">
+    <div class="card-h"><span class="badge">1</span><h2>Connect</h2></div>
+    <div class="row">
+      <button class="btn primary" id="btnConnect">Connect to box</button>
+      <button class="btn" id="btnSim">Try simulator</button>
+      <button class="btn hidden" id="btnDisconnect">Disconnect</button>
+    </div>
+    <p class="hint" id="infoLine">Plug the cable in, switch the box on and start a mode on it. Connecting only reads from the box. Use Chrome or Edge on a computer.</p>
+  </section>
+
+  <section class="card hidden" id="cardSetup">
+    <div class="card-h"><span class="badge">2</span><h2>Settings</h2></div>
+    <div class="sg">
+      <span></span>
+      <span class="h"><i class="dot" style="background:var(--cA)"></i><span><span class="full">Channel </span>A</span></span>
+      <span class="h"><i class="dot" style="background:var(--cB)"></i><span><span class="full">Channel </span>B</span></span>
+      <span class="h"><i class="dot" style="background:var(--cM)"></i><span>Multi<span class="full">-adjust</span></span></span>
+
+      <span class="l">Start at<small>level to begin at</small></span>
+      <label class="field"><input type="number" id="inA" min="0" max="100" step="1" value="45" inputmode="numeric" aria-label="Channel A start level"><span class="u">%</span></label>
+      <label class="field"><input type="number" id="inB" min="0" max="100" step="1" value="45" inputmode="numeric" aria-label="Channel B start level"><span class="u">%</span></label>
+      <label class="field"><input type="number" id="inM" min="0" max="100" step="1" value="50" inputmode="numeric" aria-label="Multi-adjust level"><span class="u">%</span></label>
+
+      <span class="l">Ramp up<small>time to reach it</small></span>
+      <label class="field sec span2"><input type="number" id="ramp" min="1" max="300" step="1" value="10" inputmode="numeric" aria-label="Ramp up time in seconds"><span class="u">sec</span></label>
+      <span class="na">goes straight there</span>
+
+      <span class="l">Maximum<small>never exceeded</small></span>
+      <label class="field"><input type="number" id="maxA" min="0" max="100" step="1" value="60" inputmode="numeric" aria-label="Channel A maximum"><span class="u">%</span></label>
+      <label class="field"><input type="number" id="maxB" min="0" max="100" step="1" value="60" inputmode="numeric" aria-label="Channel B maximum"><span class="u">%</span></label>
+      <span class="na">stays at its level</span>
+    </div>
+    <p class="hint">Percent of each knob&rsquo;s travel. A and B rise from 0 to their start level over the ramp time; multi-adjust jumps straight to its value and stays there (empty the box to leave it alone). Anything that raises A or B later stops at the maximum.</p>
+  </section>
+
+  <section class="card hidden" id="cardMode">
+    <div class="card-h"><span class="badge">3</span><h2>How should it run?</h2></div>
+    <div class="modes">
+      <div class="mode">
+        <h3>Auto-climb</h3>
+        <p>After the ramp up, A and B each go up 1% every interval until they reach their maximum.</p>
+        <label class="inl">Every <span class="field sec"><input type="number" id="stepSec" min="10" max="900" step="10" value="120" inputmode="numeric" aria-label="Seconds between steps"><span class="u">sec</span></span></label>
+        <button class="btn primary push" id="btnAuto">Start auto-climb</button>
+      </div>
+      <div class="mode">
+        <h3>Remote control</h3>
+        <p>Someone else moves A and B from a link you send, up to your maximums. You approve them first and can STOP at any time.</p>
+        <label id="hostedRow" class="col hidden">Web address where this page is hosted
+          <input type="text" id="hostedUrl" placeholder="https://example.com/et312-simple.html"></label>
+        <button class="btn push" id="btnRemote">Start remote control</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card hidden" id="cardLive">
+    <div class="card-h"><h2 id="liveTitle">Running</h2><span id="livePill" class="pill"></span></div>
+    <button class="stop" id="btnStop">STOP</button>
+
+    <div class="tiles">
+      <div class="tile" id="row_a"><div class="t"><b>Channel A</b></div>
+        <div class="v" id="lv_a">0%</div>
+        <div class="bar"><i id="bar_a" style="background:var(--cA)"></i><span class="mark" id="mk_a"></span></div>
+        <div class="sub" id="tx_a"></div>
+        <button class="btn sm" id="dn_a">&#9660; 1%</button></div>
+      <div class="tile" id="row_b"><div class="t"><b>Channel B</b></div>
+        <div class="v" id="lv_b">0%</div>
+        <div class="bar"><i id="bar_b" style="background:var(--cB)"></i><span class="mark" id="mk_b"></span></div>
+        <div class="sub" id="tx_b"></div>
+        <button class="btn sm" id="dn_b">&#9660; 1%</button></div>
+      <div class="tile" id="row_m"><div class="t"><b>Multi-adjust</b></div>
+        <div class="v" id="lv_m">0%</div>
+        <div class="bar"><i id="bar_m" style="background:var(--cM)"></i></div>
+        <div class="sub" id="tx_m"></div></div>
+    </div>
+
+    <div id="autoPanel" class="panel hidden">
+      <div class="row" style="justify-content:space-between">
+        <p class="status" id="autoCount"></p>
+        <button class="btn sm" id="btnPause">Pause</button>
+      </div>
+    </div>
+
+    <div id="remotePanel" class="panel hidden">
+      <p class="status">Send this link to the person who will control it:</p>
+      <div class="link" id="linkBox">&hellip;</div>
+      <div class="row"><button class="btn sm" id="btnCopy">Copy link</button><span class="hint" style="margin:0" id="remoteState">waiting for them to open it</span></div>
+      <div id="reqBox" class="req hidden">
+        <b>Someone opened the link.</b> Let them control?
+        <div class="row" style="margin-top:10px"><button class="btn primary" id="btnAllow">Allow</button><button class="btn" id="btnRefuse">Refuse</button></div>
+      </div>
+      <div class="row" style="margin-top:10px"><button class="btn hidden" id="btnResume">Resume remote control</button><button class="btn hidden" id="btnKick">Disconnect them</button></div>
+    </div>
+
+    <div class="endrow"><button class="btn" id="btnEnd">End session &amp; change settings</button></div>
+  </section>
+
+  <details class="card"><summary>Log</summary>
+    <label class="tgl"><input type="checkbox" id="dbgHex"> show raw bytes</label>
+    <div id="log"></div></details>
+
+  <details class="card hidden" id="cardSim"><summary>Simulator tools</summary>
+    <p class="hint">A software model of the box so you can try the page with nothing connected. Built from the published protocol notes, so it shows the page is self-consistent, not that a real box behaves identically.</p>
+    <div class="row" style="margin-top:10px"><button class="btn sm" id="simDrop">Drop acks: off</button><button class="btn sm" id="simSilent">Go silent: off</button><button class="btn sm" id="simCycle">Power-cycle sim</button></div>
+    <p class="hint" id="simOut">&ndash;</p></details>
+</div>
+
+<!-- ================= CONTROLLER VIEW (the person with the link) ================= -->
+<div id="ctlView" class="hidden">
+  <div class="top"><h1>Remote control</h1></div>
+  <div id="ctlBanner" class="banner">Connecting&hellip;</div>
+  <div id="ctlBody" class="hidden">
+    <button class="stop" id="ctlStop">STOP</button>
+    <div class="cbox" id="cRow_a"><div class="t"><span>Channel A</span><span class="small" id="cInfo_a" style="font-weight:400;color:var(--muted);font-size:13px"></span></div>
+      <div class="v" id="cVal_a">0%</div>
+      <input type="range" id="cSl_a" min="0" max="60" step="1" value="0" aria-label="Channel A">
+      <div class="row"><span></span><span class="cbtns"><button class="btn" id="cDn_a">&#9660; 1%</button><button class="btn" id="cUp_a">&#9650; 1%</button></span></div></div>
+    <div class="cbox" id="cRow_b"><div class="t"><span>Channel B</span><span class="small" id="cInfo_b" style="font-weight:400;color:var(--muted);font-size:13px"></span></div>
+      <div class="v" id="cVal_b">0%</div>
+      <input type="range" id="cSl_b" min="0" max="60" step="1" value="0" aria-label="Channel B">
+      <div class="row"><span></span><span class="cbtns"><button class="btn" id="cDn_b">&#9660; 1%</button><button class="btn" id="cUp_b">&#9650; 1%</button></span></div></div>
+    <p class="hint">Keep this page open and in front. If it loses contact for a few seconds, everything drops to zero. The host can stop or disconnect you at any time. The slider range is the host&rsquo;s maximum.</p>
+  </div>
+</div>
+
+</main>
+
+<script id="core">
+const ET = (() => {
+'use strict';
+
+const ADDR = { MODEL:0x00fc, FW:0x00fd, FLAGS:0x400f, LEVEL_A:0x4064, LEVEL_B:0x4065, MA:0x420d, MA_MIN:0x4086, MA_MAX:0x4087, POWER:0x41f4, CIPHER:0x4213 };
+const FLAG_ADC_OFF = 0x01;               // $400f bit0: ignore the pots, take levels from RAM
+const CH = ['a', 'b', 'm'];
+const NAME = { a: 'Channel A', b: 'Channel B', m: 'Multi-adjust' };
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const hex = u8 => Array.from(u8, b => b.toString(16).padStart(2, '0')).join(' ');
+const sum8 = arr => { let s = 0; for (const b of arr) s = (s + b) & 0xff; return s; };
+const swapNibbles = b => (((b << 4) | (b >> 4)) & 0xff);
+const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+const randByte = () => (typeof crypto !== 'undefined' && crypto.getRandomValues) ? crypto.getRandomValues(new Uint8Array(1))[0] : Math.floor(Math.random() * 256);
+const randId = (n = 18) => { const a = 'abcdefghijklmnopqrstuvwxyz0123456789'; let s = ''; for (let i = 0; i < n; i++) s += a[(randByte() * 36 / 256) | 0]; return 'et312-' + s; };
+
+class ET312Error extends Error {}
+
+/* ---------- byte queue with timeouts ---------- */
+class ByteQueue {
+  constructor() { this.buf = []; this.waiters = []; }
+  push(bytes) { for (const b of bytes) this.buf.push(b); this._wake(); }
+  clear() { this.buf.length = 0; }
+  read(n, timeoutMs) {
+    return new Promise(resolve => {
+      const w = { n, resolve, timer: null };
+      w.timer = setTimeout(() => {
+        this.waiters = this.waiters.filter(x => x !== w);
+        resolve(Uint8Array.from(this.buf.splice(0, Math.min(n, this.buf.length))));
+      }, timeoutMs);
+      this.waiters.push(w);
+      this._wake();
+    });
+  }
+  _wake() {
+    while (this.waiters.length && this.buf.length >= this.waiters[0].n) {
+      const w = this.waiters.shift();
+      clearTimeout(w.timer);
+      w.resolve(Uint8Array.from(this.buf.splice(0, w.n)));
+    }
+  }
+}
+
+/* ---------- ET312 wire protocol ---------- */
+class ET312 {
+  constructor(transport, { timeout = 250, syncTimeout = 120, hostKey = null, log = () => {} } = {}) {
+    this.t = transport; this.timeout = timeout; this.syncTimeout = syncTimeout;
+    this.hostKey = hostKey; this.log = log; this.key = 0;
+  }
+  async _send(bytes) {
+    this.t.queue.clear();
+    this.log('tx', bytes);
+    const out = this.key ? Uint8Array.from(bytes, b => b ^ this.key) : Uint8Array.from(bytes);
+    await this.t.write(out);
+  }
+  async _recv(n, timeout = this.timeout) {
+    const r = await this.t.queue.read(n, timeout);
+    this.log('rx', r);
+    return r;
+  }
+  /** Handshake: 0x00 -> 0x07. Repeating zeros also resynchronises a half-sent command. */
+  async sync(maxTries = 12) {
+    for (let i = 0; i < maxTries; i++) {
+      await this._send([0x00]);
+      const r = await this._recv(1, this.syncTimeout);
+      if (r.length === 1 && r[0] === 0x07) return true;
+    }
+    return false;
+  }
+  async keyExchange() {
+    if (this.key !== 0) throw new ET312Error('Key already set');
+    const host = this.hostKey ?? randByte();
+    const msg = [0x2f, host]; msg.push(sum8(msg));
+    await this._send(msg);
+    const r = await this._recv(3);
+    if (r.length !== 3 || r[0] !== 0x21 || r[2] !== sum8([r[0], r[1]]))
+      throw new ET312Error('Key exchange failed (no valid reply from box)');
+    this.key = (swapNibbles(host) ^ r[1] ^ 0x55) & 0xff;
+  }
+  async readByte(addr) {
+    const m = [0x3c, (addr >> 8) & 0xff, addr & 0xff]; m.push(sum8(m));
+    await this._send(m);
+    const r = await this._recv(3);
+    if (r.length !== 3) throw new ET312Error('No reply reading $' + addr.toString(16));
+    if (r[0] !== 0x22 || r[2] !== sum8([r[0], r[1]])) throw new ET312Error('Bad reply reading $' + addr.toString(16) + ' (' + hex(r) + ')');
+    return r[1];
+  }
+  async writeBytes(addr, vals) {
+    if (vals.length < 1 || vals.length > 8) throw new ET312Error('Write length must be 1-8');
+    const cmd = ((vals.length + 3) << 4) | 0x0d;
+    const m = [cmd, (addr >> 8) & 0xff, addr & 0xff, ...vals]; m.push(sum8(m));
+    await this._send(m);
+    const r = await this._recv(1);
+    if (r.length !== 1) throw new ET312Error('No acknowledgement writing $' + addr.toString(16));
+    if (r[0] !== 0x06) throw new ET312Error('Unexpected reply 0x' + r[0].toString(16) + ' writing $' + addr.toString(16));
+  }
+  /** Clear the cipher key so the next session can handshake without a power cycle. */
+  async resetKey() { await this.writeBytes(ADDR.CIPHER, [0x00]); this.key = 0; }
+}
+
+/* ---------- transports ---------- */
+class WebSerialTransport {
+  constructor() { this.queue = new ByteQueue(); this.onError = null; this._alive = false; }
+  async open() {
+    this.port = await navigator.serial.requestPort();
+    await this.port.open({ baudRate: 19200, dataBits: 8, stopBits: 1, parity: 'none', flowControl: 'none' });
+    this.writer = this.port.writable.getWriter();
+    this.reader = this.port.readable.getReader();
+    this._alive = true;
+    this._loop();
+  }
+  async _loop() {
+    try {
+      for (;;) {
+        const { value, done } = await this.reader.read();
+        if (done) break;
+        if (value && value.length) this.queue.push(value);
+      }
+    } catch (e) { if (this._alive && this.onError) this.onError(e); }
+    finally { try { this.reader.releaseLock(); } catch (_) {} }
+  }
+  async write(u8) { await this.writer.write(u8); }
+  async close() {
+    this._alive = false;
+    try { await this.reader.cancel(); } catch (_) {}
+    await sleep(30);
+    try { this.writer.releaseLock(); } catch (_) {}
+    try { await this.port.close(); } catch (_) {}
+  }
+}
+
+/* ---------- simulated box (built from the published protocol notes) ---------- */
+class SimBox {
+  constructor(o = {}) {
+    this.ram = new Uint8Array(0x4400);
+    this.flash = new Uint8Array(0x100);
+    this.flash[0xfc] = 0x0c; this.flash[0xfd] = 1; this.flash[0xfe] = o.fwMinor ?? 6; this.flash[0xff] = 0;
+    this.potA = o.potA ?? 0; this.potB = o.potB ?? 0; this.potM = o.potM ?? 128;
+    this.ram[0x41f4] = o.powerLevel ?? 0;
+    this.ram[0x4086] = 0x0f; this.ram[0x4087] = 0xff;      // multi-adjust range, as documented defaults
+    this.fixedBoxKey = o.boxKey ?? null;
+    this.faults = { dropAck: false, silent: false };
+    this.out = () => {}; this.rx = []; this.need = 0;
+    this.stats = { rejected: 0, writes: 0 };
+    this._adc();
+  }
+  get cipher() { return this.ram[0x4213]; }
+  _adc() { if (!(this.ram[0x400f] & 1)) { this.ram[0x4064] = this.potA & 255; this.ram[0x4065] = this.potB & 255; this.ram[0x420d] = this.potM & 255; } }
+  effective() { this._adc(); return { a: this.ram[0x4064], b: this.ram[0x4065], m: this.ram[0x420d] }; }
+  powerCycle() { const p = this.ram[0x41f4]; this.ram.fill(0); this.ram[0x41f4] = p; this.ram[0x4086] = 0x0f; this.ram[0x4087] = 0xff; this.rx = []; this._adc(); }
+  read(addr) {
+    if (addr < 0x100) return this.flash[addr];
+    if (addr >= 0x4000 && addr < 0x4400) { this._adc(); return this.ram[addr]; }
+    return 0;
+  }
+  write(addr, v) {
+    if (addr >= 0x4000 && addr < 0x4400) { this.ram[addr] = v & 255; this._adc(); }
+  }
+  receive(b) {
+    if (this.faults.silent) return;
+    const d = (b ^ this.cipher) & 0xff, rx = this.rx;
+    rx.push(d);
+    if (rx.length === 1) {
+      if (d === 0x00) { rx.length = 0; this.out([0x07]); return; }
+      if (d === 0x2f) this.need = 3;
+      else if (d === 0x3c) this.need = 4;
+      else if ((d & 0x0f) === 0x0d && (d >> 4) >= 4 && (d >> 4) <= 0xb) this.need = (d >> 4) + 1;
+      else { rx.length = 0; this.stats.rejected++; }
+      return;
+    }
+    if (rx.length < this.need) return;
+    this._handle(rx.splice(0));
+  }
+  _handle(m) {
+    if (sum8(m.slice(0, -1)) !== m[m.length - 1]) { this.stats.rejected++; return; }
+    const c = m[0];
+    if (c === 0x2f) {
+      const boxKey = this.fixedBoxKey ?? randByte();
+      const reply = [0x21, boxKey]; reply.push(sum8(reply));
+      this.out(reply);
+      this.ram[0x4213] = (swapNibbles(m[1]) ^ boxKey ^ 0x55) & 0xff;
+      return;
+    }
+    if (c === 0x3c) {
+      const v = this.read((m[1] << 8) | m[2]);
+      const r = [0x22, v]; r.push(sum8(r)); this.out(r); return;
+    }
+    const n = m.length - 4, addr = (m[1] << 8) | m[2];
+    for (let i = 0; i < n; i++) this.write(addr + i, m[3 + i]);
+    this.stats.writes++;
+    if (!this.faults.dropAck) this.out([0x06]);
+  }
+}
+class SimTransport {
+  constructor(box, { latencyMs = 0 } = {}) {
+    this.box = box; this.queue = new ByteQueue(); this.lat = latencyMs;
+    box.out = bytes => { if (this.lat) setTimeout(() => this.queue.push(bytes), this.lat); else this.queue.push(bytes); };
+  }
+  async write(u8) { if (this.lat) await sleep(this.lat); for (const b of u8) this.box.receive(b); }
+  async close() {}
+}
+
+function slew(cur, target, dt, upPerSec, downPerSec) {
+  return target > cur ? Math.min(target, cur + upPerSec * dt) : Math.max(target, cur - downPerSec * dt);
+}
+
+/* ---------- session: connection, arming, limits, start ramp, auto-climb, remote targets, verification ---------- */
+class Session {
+  constructor(box, opts = {}) {
+    this.box = box;
+    this.cfg = Object.assign({ initial: { a: 45, b: 45, m: 50 }, maxPct: { a: 60, b: 60 }, rampSec: 10, upPct: 4, downPct: 50, verifyMs: 1000, deadmanMs: 4000, clock: () => performance.now() }, opts);
+    this.clock = this.cfg.clock;
+    this.state = 'idle';                 // idle | connected | armed | held | fault
+    this.info = {};
+    this.max = { a: 0, b: 0, m: 0 };     // A/B: ceilings (percent). m mirrors the fixed multi-adjust value (display only)
+    this.init = { a: 0, b: 0, m: null }; // start levels (percent). m === null means "leave multi-adjust alone"
+    this.rampSec = 10; this.ramp = null;
+    this.level = { a: 0, b: 0, m: 0 };   // rate-limited level, percent (float)
+    this.user = { a: 0, b: 0 };          // remote controller's request, percent
+    this.offset = { a: 0, b: 0 };        // auto-climb nudges, percent
+    this.cmd = { a: 0, b: 0, m: 0 };     // raw bytes we want on the box
+    this.written = null; this.confirmed = null;
+    this.mode = 'none';                  // none | auto | remote
+    this.stepSec = 120; this.auto = { activeMs: 0, paused: false };
+    this.remote = { connected: false, lastHb: 0, locked: false, lost: false };
+    this._pumping = null; this._running = false; this._hold = false;
+    this._last = 0; this._lastVerify = 0; this._verifyFails = 0; this._maWarned = false;
+    this.faultInfo = null;
+    this.onEvent = () => {};
+  }
+  emit(type, data) { try { this.onEvent(type, data); } catch (_) {} }
+  log(msg) { this.emit('log', msg); }
+  setState(s) { this.state = s; this.emit('state', s); }
+  get upRate() { return this.cfg.upPct; }
+  get downRate() { return this.cfg.downPct; }
+  driven(ch) { return ch === 'm' ? this.init.m !== null : this.max[ch] > 0; }
+
+  /** percent (0-100) -> byte written to the box. Always rounds DOWN. */
+  rawOf(ch, p) {
+    if (ch === 'm') {
+      if (!this.driven('m')) return this.info.maHold;
+      const lo = this.info.maMin, hi = this.info.maMax;
+      return clamp(Math.floor(lo + (hi - lo) * clamp(p, 0, 100) / 100 + 1e-9), lo, hi);
+    }
+    return clamp(Math.floor(p * 2.55 + 1e-9), 0, 255);
+  }
+  /** byte -> whole percent, rounded DOWN, so the screen can never read ahead of what was actually sent */
+  pctOf(ch, raw) {
+    if (ch === 'm') { const lo = this.info.maMin, hi = this.info.maMax; return hi > lo ? clamp(Math.floor((raw - lo) / (hi - lo) * 100 + 1e-9), 0, 100) : 0; }
+    return clamp(Math.floor(raw / 2.55 + 1e-9), 0, 100);
+  }
+
+  async _readMA() {
+    this.info.maMin = await this.box.readByte(ADDR.MA_MIN);
+    this.info.maMax = await this.box.readByte(ADDR.MA_MAX);
+    this.info.maHold = await this.box.readByte(ADDR.MA);
+  }
+
+  /** Read-only: handshake, identify the box. */
+  async connect() {
+    this.info = {};
+    if (!(await this.box.sync()))
+      throw new ET312Error('No response from the box. Check the cable and that the box is on, and that no other program has the port open. If a previous session ended badly, switch the box off and on.');
+    this.info.model = await this.box.readByte(ADDR.MODEL);
+    this.info.fw = [await this.box.readByte(ADDR.FW), await this.box.readByte(ADDR.FW + 1), await this.box.readByte(ADDR.FW + 2)];
+    this.info.power = await this.box.readByte(ADDR.POWER);
+    this.info.flags = await this.box.readByte(ADDR.FLAGS);
+    this.info.knobsDisabled = !!(this.info.flags & FLAG_ADC_OFF);
+    await this._readMA();
+    this.setState('connected');
+    return this.info;
+  }
+
+  /** Validate the settings in cfg. Pure: touches nothing. Throws ET312Error with a plain-English reason. */
+  _settings() {
+    const c = this.cfg, num = (v, d = 0) => { const x = Number(v); return Number.isFinite(x) ? x : d; };
+    const max = { a: clamp(num(c.maxPct && c.maxPct.a), 0, 100), b: clamp(num(c.maxPct && c.maxPct.b), 0, 100) };
+    const ini = c.initial || {};
+    const init = { a: clamp(num(ini.a), 0, 100), b: clamp(num(ini.b), 0, 100) };
+    const mRaw = ini.m;
+    init.m = (mRaw === null || mRaw === undefined || String(mRaw).trim() === '' || !Number.isFinite(Number(mRaw))) ? null : clamp(Number(mRaw), 0, 100);
+    for (const ch of ['a', 'b'])
+      if (init[ch] > max[ch]) throw new ET312Error(NAME[ch] + ': the start level (' + init[ch] + '%) is above its maximum (' + max[ch] + '%).');
+    if (!max.a && !max.b && init.m === null) throw new ET312Error('Both maximums are 0 and multi-adjust is blank, so there is nothing to control.');
+    return { max, init, rampSec: clamp(num(c.rampSec, 10), 1, 300) };
+  }
+  _apply(s) { this.max = { a: s.max.a, b: s.max.b, m: s.init.m ?? 0 }; this.init = s.init; this.rampSec = s.rampSec; }
+  _maRaw() { return this.driven('m') ? this.rawOf('m', this.init.m) : this.info.maHold; }
+
+  async arm() {
+    if (this.state !== 'connected') throw new ET312Error('Not connected');
+    if (this.info.model !== 0x0c) throw new ET312Error('Model byte 0x' + this.info.model.toString(16) + ' is not an ET312 (expected 0x0c). Not arming.');
+    const s = this._settings();            // validate everything before the box is touched
+    await this._readMA();                  // the multi-adjust range depends on the running mode, so read it fresh
+    this._apply(s);
+    await this.box.keyExchange();
+    const flags = await this.box.readByte(ADDR.FLAGS);
+    await this.box.writeBytes(ADDR.FLAGS, [flags | FLAG_ADC_OFF]);
+    await this.box.writeBytes(ADDR.LEVEL_A, [0, 0]);
+    const m0 = this._maRaw();
+    await this.box.writeBytes(ADDR.MA, [m0]);        // multi-adjust goes straight to its value
+    const f = await this.box.readByte(ADDR.FLAGS), a = await this.box.readByte(ADDR.LEVEL_A), b = await this.box.readByte(ADDR.LEVEL_B);
+    if (!(f & FLAG_ADC_OFF) || a !== 0 || b !== 0) {
+      try { await this.box.writeBytes(ADDR.LEVEL_A, [0, 0]); await this.box.resetKey(); } catch (_) {}
+      this.setState('held');
+      throw new ET312Error('The box did not accept control (flags 0x' + f.toString(16) + ', A=' + a + ', B=' + b + '). Output held at zero; switch the box off and on before retrying.');
+    }
+    this.level = { a: 0, b: 0, m: this.init.m ?? 0 }; this.user = { a: 0, b: 0 }; this.offset = { a: 0, b: 0 };
+    this.cmd = { a: 0, b: 0, m: m0 }; this.written = { a: 0, b: 0, m: m0 }; this.confirmed = { a: 0, b: 0, m: m0 };
+    this.mode = 'none'; this.ramp = null; this._verifyFails = 0; this._maWarned = false;
+    this._lastVerify = this.clock(); this._last = this.clock();
+    this.setState('armed');
+    this.log('Armed. Start A ' + this.init.a + '%, B ' + this.init.b + '%, multi-adjust ' + (this.init.m === null ? 'left alone' : this.init.m + '%') + '; maximum A ' + this.max.a + '%, B ' + this.max.b + '%; ramp ' + this.rampSec + ' s. Output is 0.');
+    this.emit('levels', this.snapshot());
+  }
+
+  /** Change the settings between runs (only while armed and idle). */
+  async reconfigure() {
+    if (this.state !== 'armed' || this.mode !== 'none') throw new ET312Error('Settings can only be changed between runs');
+    const s = this._settings();
+    this._hold = true;                       // keep the writer off the serial line while we read
+    try {
+      await this._drain();
+      await this._readMA();
+      this._apply(s);
+      this.level = { a: 0, b: 0, m: this.init.m ?? 0 }; this.user = { a: 0, b: 0 }; this.offset = { a: 0, b: 0 };
+      this.cmd = { a: 0, b: 0, m: this._maRaw() };
+    } finally { this._hold = false; }
+    this._maWarned = false;
+    this.log('Settings: start A ' + this.init.a + '%, B ' + this.init.b + '%, multi-adjust ' + (this.init.m === null ? 'left alone' : this.init.m + '%') + '; maximum A ' + this.max.a + '%, B ' + this.max.b + '%; ramp ' + this.rampSec + ' s.');
+    this._pump();
+  }
+
+  /* ---- modes ---- */
+  _beginRun() { this.ramp = { startMs: this.clock(), sec: this.rampSec }; }
+  _ramping(now) { return !!this.ramp && now - this.ramp.startMs < this.ramp.sec * 1000; }
+  startAuto(stepSec) {
+    if (this.state !== 'armed') throw new ET312Error('Not armed');
+    if (!(stepSec >= 1)) throw new ET312Error('Bad interval');
+    this.stepSec = stepSec; this.mode = 'auto'; this.auto = { activeMs: 0, paused: false };
+    this.offset = { a: 0, b: 0 }; this._beginRun();
+    this.log('Auto-climb: ramp up over ' + this.rampSec + ' s, then +1% every ' + stepSec + ' s.'); this.emit('mode', this.mode);
+  }
+  pauseAuto(p) { if (this.mode === 'auto') { this.auto.paused = !!p; this.log(p ? 'Paused.' : 'Resumed.'); } }
+  startRemote() {
+    if (this.state !== 'armed') throw new ET312Error('Not armed');
+    this.mode = 'remote'; this.remote = { connected: false, lastHb: 0, locked: false, lost: false };
+    this.user = { a: 0, b: 0 }; this.ramp = null; this.log('Remote control: waiting for a controller.'); this.emit('mode', this.mode);
+  }
+  _steps() { return Math.floor(this.auto.activeMs / 1000 / this.stepSec + 1e-9); }
+  _target(ch) {
+    const M = this.max[ch]; if (!(M > 0)) return 0;
+    if (this.mode === 'auto') return clamp(this.init[ch] + this._steps() + this.offset[ch], 0, M);
+    if (this.mode === 'remote') { const r = this.remote; return (!r.connected || r.locked || r.lost) ? 0 : clamp(this.user[ch], 0, M); }
+    return 0;
+  }
+  /** lower one knob by 1% (auto-climb continues from there) */
+  nudgeDown(ch) {
+    if (this.mode !== 'auto' || (ch !== 'a' && ch !== 'b') || !(this.max[ch] > 0)) return;
+    const t = this._target(ch);
+    this.offset[ch] = Math.max(0, t - 1) - this.init[ch] - this._steps();
+  }
+  /** Immediate zero for A and B (multi-adjust stays where it is). Safe in any state, any number of times.
+   *  Auto mode: ends the climb. Remote mode: locks control until resumeRemote(). */
+  stop(reason = 'STOP', { lock = true } = {}) {
+    for (const ch of ['a', 'b']) { this.level[ch] = 0; this.user[ch] = 0; this.offset[ch] = 0; }
+    this.cmd = { a: 0, b: 0, m: this.cmd.m };
+    if (this.mode === 'auto') { this.mode = 'none'; this.auto = { activeMs: 0, paused: false }; this.ramp = null; this.emit('mode', this.mode); }
+    else if (this.mode === 'remote' && lock) { this.remote.locked = true; this.emit('remote', { locked: true }); }
+    this.log(reason + ': A and B set to 0.');
+    if (this.state === 'armed') this._pump();
+  }
+  resumeRemote() { if (this.mode === 'remote') { this.remote.locked = false; this.remote.lost = false; this.log('Remote control resumed.'); this.emit('remote', { locked: false }); } }
+  backToSetup() { this.stop('Session ended', { lock: false }); this.mode = 'none'; this.ramp = null; this.remote = { connected: false, lastHb: 0, locked: false, lost: false }; this.emit('mode', this.mode); }
+
+  /* ---- remote controller inputs ---- */
+  remoteAttach() {
+    this.remote.connected = true; this.remote.lost = false; this.remote.lastHb = this.clock();
+    this.user = { a: this.init.a, b: this.init.b }; this._beginRun();      // A and B ramp up to their start levels
+    this.emit('remote', { connected: true });
+  }
+  remoteDetach() { this.remote.connected = false; this.user = { a: 0, b: 0 }; this.emit('remote', { connected: false }); }
+  remoteSet(v) {
+    if (this.state !== 'armed' || this.mode !== 'remote' || !this.remote.connected || this.remote.locked) return;
+    for (const ch of ['a', 'b']) {                   // multi-adjust is never remote-controlled
+      const x = Number(v && v[ch]);
+      if (Number.isFinite(x) && this.driven(ch)) this.user[ch] = clamp(x, 0, this.max[ch]);
+    }
+    this.remote.lastHb = this.clock();
+    if (this.remote.lost) { this.remote.lost = false; this.emit('remote', { lost: false }); }
+  }
+
+  /** Call about every 100 ms while armed. */
+  tick(now = this.clock()) {
+    if (this.state !== 'armed') return;
+    const dt = (now - this._last) / 1000; this._last = now;
+    if (dt > 1.5) {
+      this.stop('Watchdog (timer stalled for ' + dt.toFixed(1) + ' s - tab in background?)', { lock: true });
+      this.emit('warn', 'The timer stalled for ' + dt.toFixed(1) + ' s, so output was set to zero. Keep this tab visible while running.');
+      return;
+    }
+    const ramping = this._ramping(now);
+    if (this.mode === 'auto' && !this.auto.paused && !ramping) this.auto.activeMs += dt * 1000;
+    if (this.mode === 'remote' && this.remote.connected && !this.remote.lost && now - this.remote.lastHb > this.cfg.deadmanMs) {
+      this.remote.lost = true; this.user = { a: 0, b: 0 };
+      this.log('No signal from the controller for ' + Math.round(this.cfg.deadmanMs / 1000) + ' s: output ramping to zero.');
+      this.emit('remote', { lost: true });
+    }
+    for (const ch of ['a', 'b']) {
+      if (!this.driven(ch)) { this.level[ch] = 0; this.cmd[ch] = 0; continue; }
+      const tgt = clamp(this._target(ch), 0, this.max[ch]);
+      let up = this.upRate;
+      if (ramping && this.level[ch] < this.init[ch]) up = this.init[ch] / this.ramp.sec;   // start ramp: reach the start level in rampSec
+      this.level[ch] = Math.min(slew(this.level[ch], tgt, dt, up, this.downRate), this.max[ch]);
+      this.cmd[ch] = this.rawOf(ch, this.level[ch]);
+    }
+    this.cmd.m = this._maRaw(); this.level.m = this.init.m ?? 0;
+    this._pump();
+    this.emit('levels', this.snapshot());
+  }
+
+  snapshot() {
+    const now = this.clock(), ramping = this._ramping(now);
+    const nextIn = this.mode === 'auto' && !ramping ? this.stepSec - ((this.auto.activeMs / 1000) % this.stepSec) : null;
+    return { state: this.state, mode: this.mode, level: { ...this.level }, max: { ...this.max }, init: { ...this.init }, cmd: { ...this.cmd },
+      confirmed: this.confirmed && { ...this.confirmed },
+      ramp: { active: ramping, left: ramping ? Math.max(0, this.ramp.sec - (now - this.ramp.startMs) / 1000) : 0 },
+      auto: { paused: this.auto.paused, stepSec: this.stepSec, nextIn, steps: this._steps() },
+      remote: { ...this.remote } };
+  }
+
+  /* serialised writer: always re-reads this.cmd, so a STOP issued mid-write is picked up on the next pass */
+  _pump() {
+    if (this._hold || this._running) return this._pumping;     // _running is cleared synchronously when the loop ends, so a later STOP always starts a fresh pass
+    this._running = true;
+    const p = this._pumpLoop().finally(() => { if (this._pumping === p) this._pumping = null; });
+    this._pumping = p;
+    return p;
+  }
+  async _pumpLoop() {
+    try {
+      for (;;) {
+        if (this.state !== 'armed') break;
+        const w = this.written, c = this.cmd;
+        if (!w || w.a !== c.a || w.b !== c.b) { await this._writeAB(c.a, c.b); continue; }
+        if (w.m !== c.m) { await this._writeM(c.m); continue; }
+        if (this.clock() - this._lastVerify >= this.cfg.verifyMs) { await this._verify(); continue; }
+        break;
+      }
+    } catch (e) { await this._fault(e); }
+    finally { this._running = false; }
+  }
+  async _writeAB(a, b) {
+    try { await this.box.writeBytes(ADDR.LEVEL_A, [a, b]); }
+    catch (e) {
+      this.log('Write failed (' + e.message + '); resynchronising and retrying once.');
+      if (!(await this.box.sync())) throw e;
+      await this.box.writeBytes(ADDR.LEVEL_A, [a, b]);   // absolute levels, so a repeat is harmless
+    }
+    this.written = { ...this.written, a, b };
+  }
+  async _writeM(m) {
+    try { await this.box.writeBytes(ADDR.MA, [m]); }
+    catch (e) {
+      this.log('Write failed (' + e.message + '); resynchronising and retrying once.');
+      if (!(await this.box.sync())) throw e;
+      await this.box.writeBytes(ADDR.MA, [m]);
+    }
+    this.written = { ...this.written, m };
+  }
+  async _verify() {
+    this._lastVerify = this.clock();
+    const w = this.written;
+    const f = await this.box.readByte(ADDR.FLAGS), a = await this.box.readByte(ADDR.LEVEL_A), b = await this.box.readByte(ADDR.LEVEL_B), m = await this.box.readByte(ADDR.MA);
+    this.confirmed = { a, b, m };
+    if (!(f & FLAG_ADC_OFF) || a !== w.a || b !== w.b) {
+      this._verifyFails++;
+      this.log('Readback mismatch: box has A=' + a + ' B=' + b + ' flags=0x' + f.toString(16) + ', expected A=' + w.a + ' B=' + w.b + '.');
+      if (this._verifyFails >= 2) throw new ET312Error('The box output does not match what was commanded (A=' + a + ', B=' + b + ').');
+      this.written = { a: -1, b: -1, m: w.m }; this._lastVerify = this.clock() - this.cfg.verifyMs + 200;
+    } else this._verifyFails = 0;
+    if (m !== w.m && !this._maWarned) {
+      this._maWarned = true;
+      this.log('Multi-adjust readback differs (box has ' + m + ', sent ' + w.m + ').');
+      this.emit('warn', 'The box does not confirm the multi-adjust value I send (it reads back ' + m + ', I sent ' + w.m + '). Channels A and B are confirmed fine; multi-adjust may not be under software control on this firmware.');
+    }
+    this.emit('levels', this.snapshot());
+  }
+  async _fault(err) {
+    if (this.state === 'fault') return;
+    for (const ch of ['a', 'b']) { this.level[ch] = 0; this.user[ch] = 0; }
+    this.cmd = { a: 0, b: 0, m: this.cmd.m };
+    this.setState('fault');
+    this.log('FAULT: ' + err.message);
+    let zero = false;
+    for (let i = 0; i < 3 && !zero; i++) {
+      try {
+        if (!(await this.box.sync())) continue;
+        try { await this.box.writeBytes(ADDR.LEVEL_A, [0, 0]); } catch (_) { /* the ack may be lost even though the write landed; the readback decides */ }
+        zero = (await this.box.readByte(ADDR.LEVEL_A)) === 0 && (await this.box.readByte(ADDR.LEVEL_B)) === 0;
+      } catch (_) {}
+    }
+    this.faultInfo = { reason: err.message, zeroConfirmed: zero };
+    this.confirmed = zero ? { a: 0, b: 0, m: this.cmd.m } : null;
+    this.emit('fault', this.faultInfo);
+  }
+
+  async _drain() { for (let i = 0; i < 200 && this._pumping; i++) await sleep(10); }
+
+  /** Normal disconnect: zero, confirm, clear the key, close. The box stays held at zero with the knobs disabled. */
+  async shutdown() {
+    const wasArmed = this.state === 'armed';
+    this.stop('Disconnect', { lock: false });
+    await this._drain();
+    let zero = !wasArmed;
+    if (wasArmed) {
+      try {
+        zero = (await this.box.readByte(ADDR.LEVEL_A)) === 0 && (await this.box.readByte(ADDR.LEVEL_B)) === 0;
+        await this.box.resetKey();
+      } catch (e) { this.log('Shutdown: ' + e.message); }
+    }
+    try { await this.box.t.close(); } catch (_) {}
+    this.setState(wasArmed ? 'held' : 'idle');
+    this.emit('closed', { zeroConfirmed: zero, held: wasArmed });
+    return zero;
+  }
+}
+
+/* ---------- remote host: talks to one controller over a PeerJS-style connection ---------- */
+class RemoteHost {
+  constructor(session, emit = () => {}) { this.s = session; this.emit = emit; this.conn = null; this.pending = null; }
+  _send(conn, obj) {
+    const go = () => { try { conn.send(obj); } catch (_) {} };
+    if (conn.open) go(); else conn.on('open', go);
+  }
+  accept(conn) {
+    if (this.conn || this.pending) {                       // one controller at a time
+      this._send(conn, { t: 'busy' });
+      setTimeout(() => { try { conn.close(); } catch (_) {} }, 400);
+      return;
+    }
+    this.pending = conn;
+    conn.on('data', m => this._data(conn, m));
+    conn.on('close', () => this._closed(conn));
+    conn.on('error', () => this._closed(conn));
+    this._send(conn, { t: 'wait' });
+    this.emit('request');
+  }
+  allow() {
+    if (!this.pending) return;
+    this.conn = this.pending; this.pending = null;
+    this.s.remoteAttach();
+    this._send(this.conn, { t: 'hello', max: { a: this.s.max.a, b: this.s.max.b }, init: { a: this.s.init.a, b: this.s.init.b }, driven: { a: this.s.driven('a'), b: this.s.driven('b'), m: false } });
+    this.emit('attached');
+  }
+  refuse() {
+    const c = this.pending; if (!c) return;
+    this.pending = null; this._send(c, { t: 'refused' });
+    setTimeout(() => { try { c.close(); } catch (_) {} }, 400);
+    this.emit('cleared');
+  }
+  kick() {
+    const c = this.conn; if (!c) return;
+    this._send(c, { t: 'ended' });
+    setTimeout(() => { try { c.close(); } catch (_) {} }, 300);
+    this.conn = null; this.s.remoteDetach(); this.emit('detached');
+  }
+  _data(conn, m) {
+    if (conn !== this.conn || !m || typeof m !== 'object') return;
+    if (m.t === 'set') this.s.remoteSet(m);
+    else if (m.t === 'stop') this.s.stop('Controller pressed STOP', { lock: false });
+  }
+  _closed(conn) {
+    if (conn === this.pending) { this.pending = null; this.emit('cleared'); }
+    if (conn === this.conn) { this.conn = null; this.s.remoteDetach(); this.emit('detached'); }
+  }
+  pushState() {
+    if (!this.conn) return;
+    const sn = this.s.snapshot(), p = ch => this.s.pctOf(ch, sn.cmd[ch]);
+    this._send(this.conn, { t: 'state', level: { a: p('a'), b: p('b') }, locked: sn.remote.locked, lost: sn.remote.lost, state: sn.state });
+  }
+  shutdown() { for (const c of [this.conn, this.pending]) { if (c) { try { c.close(); } catch (_) {} } } this.conn = null; this.pending = null; }
+}
+
+return { ADDR, CH, NAME, ET312, ET312Error, ByteQueue, SimBox, SimTransport, WebSerialTransport, Session, RemoteHost,
+         slew, sum8, swapNibbles, clamp, sleep, hex, randId };
+})();
+</script>
+
+<script id="ui">
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const show = (id, on) => $(id).classList.toggle('hidden', !on);
+const CH = ET.CH, AB = ['a', 'b'];
+const PEER_URLS = ['https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js', 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js'];
+
+function loadPeerJS() {
+  return new Promise((resolve, reject) => {
+    if (window.Peer) return resolve();
+    let i = 0;
+    const next = () => {
+      if (i >= PEER_URLS.length) return reject(new Error('Could not load the PeerJS library (are you online?)'));
+      const s = document.createElement('script');
+      s.src = PEER_URLS[i++];
+      s.onload = () => (window.Peer ? resolve() : next());
+      s.onerror = next;
+      document.head.appendChild(s);
+    };
+    next();
+  });
+}
+const store = { get: k => { try { return localStorage.getItem(k); } catch (_) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} } };
+
+const hash = (typeof location !== 'undefined' && location.hash) || '';
+const ctlId = (hash.match(/[#&]c=([A-Za-z0-9_-]+)/) || [])[1];
+if (ctlId) controllerView(ctlId); else hostView();
+
+/* ===================================================================== */
+/* HOST VIEW                                                             */
+/* ===================================================================== */
+function hostView() {
+  let session = null, transport = null, sim = null, timer = null, simTimer = null, pushTimer = null;
+  let peer = null, host = null, linkText = '';
+
+  function log(msg) { const el = $('log'); el.textContent += new Date().toLocaleTimeString() + '  ' + msg + '\n'; el.scrollTop = el.scrollHeight; }
+  const rawLog = (dir, bytes) => { if ($('dbgHex').checked) log('  ' + dir + ' ' + ET.hex(bytes)); };
+  function banner(id, html) { const el = $(id); if (html) { el.innerHTML = html; el.classList.remove('hidden'); } else el.classList.add('hidden'); }
+  function setConn(text, cls) { const p = $('connState'); p.textContent = text; p.className = 'pill ' + cls; }
+  const showSetup = on => { show('cardSetup', on); show('cardMode', on); };
+
+  const isFile = typeof location !== 'undefined' && location.protocol === 'file:';
+  if (isFile) { show('hostedRow', true); $('hostedUrl').value = store.get('et312-hosted') || ''; }
+
+  /* ----- connect ----- */
+  async function startSession(tr) {
+    transport = tr; banner('faultBanner', ''); banner('noteBanner', '');
+    session = new ET.Session(new ET.ET312(tr, { log: rawLog }), {});
+    session.onEvent = onEvent;
+    tr.onError = e => { log('Serial error: ' + e.message); if (session && session.state === 'armed') session._fault(e); };
+    setConn('connecting…', '');
+    try { await session.connect(); }
+    catch (e) {
+      log('Connect failed: ' + e.message); banner('noteBanner', '<b>Could not connect.</b> ' + e.message);
+      try { await tr.close(); } catch (_) {}
+      session = null; setConn('not connected', ''); return;
+    }
+    const i = session.info, names = ['Low', 'Normal', 'High'];
+    $('infoLine').textContent = 'Connected. Box model 0x' + i.model.toString(16).padStart(2, '0') + ', firmware ' + i.fw.join('.') + ', power level ' + (names[i.power] || i.power) + '.';
+    if (i.model !== 0x0c) banner('noteBanner', '<b>This does not look like an ET312</b> (model byte 0x' + i.model.toString(16) + '). Arming is blocked.');
+    else if (i.knobsDisabled) banner('noteBanner', '<b>The knobs are currently disabled on the box</b> (an earlier session left it held at zero). It still works with this page; switch the box off and on to get the knobs back later.');
+    else if (!(i.fw[0] === 1 && (i.fw[1] === 5 || i.fw[1] === 6))) banner('noteBanner', '<b>Unusual firmware ' + i.fw.join('.') + '.</b> The memory map used here is documented for 1.5 and 1.6. Every write is read back and checked, but go carefully.');
+    show('btnConnect', false); show('btnSim', false); show('btnDisconnect', true); showSetup(true);
+    setConn('connected (read-only)', 'ok');
+  }
+  $('btnConnect').onclick = async () => {
+    if (!('serial' in navigator)) { banner('noteBanner', '<b>Web Serial is not available in this browser.</b> Use Chrome or Edge on a computer.'); return; }
+    const tr = new ET.WebSerialTransport();
+    try { await tr.open(); } catch (e) { log('Port not opened: ' + e.message); banner('noteBanner', 'Port not opened: ' + e.message); return; }
+    await startSession(tr);
+  };
+  $('btnSim').onclick = async () => {
+    sim = new ET.SimBox({ potA: 100, potB: 100, potM: 90 });
+    show('cardSim', true);
+    simTimer = setInterval(() => { const e = sim.effective(); $('simOut').textContent = 'sim box bytes: A ' + e.a + '  B ' + e.b + '  MA ' + e.m + '  (0-255)   key 0x' + sim.cipher.toString(16); }, 150);
+    await startSession(new ET.SimTransport(sim, { latencyMs: 6 }));
+  };
+  $('btnDisconnect').onclick = async () => { if (!session) return; stopTimers(); if (host) host.shutdown(); await session.shutdown(); };
+
+  /* ----- settings and starting a run ----- */
+  function checkSettings() {            // returns the validated settings, or null after saying why
+    banner('noteBanner', '');
+    session.cfg.initial = { a: $('inA').value, b: $('inB').value, m: $('inM').value };
+    session.cfg.maxPct = { a: $('maxA').value, b: $('maxB').value };
+    session.cfg.rampSec = $('ramp').value;
+    try { return session._settings(); }
+    catch (e) { banner('noteBanner', '<b>Check the settings.</b> ' + e.message); return null; }
+  }
+  function describe(s) {
+    return 'Start: A ' + s.init.a + '%, B ' + s.init.b + '%, multi-adjust ' + (s.init.m === null ? 'left alone' : s.init.m + '% straight away') +
+      '\nRamp up: ' + s.rampSec + ' s\nMaximum: A ' + s.max.a + '%, B ' + s.max.b + '%';
+  }
+  function confirmStart(label) {
+    const s = checkSettings(); if (!s) return false;
+    return confirm(label + '\n\n' + describe(s) + '\n\nIf this page or the PC fails, the box keeps its last level — switch the box off.');
+  }
+  async function takeControl() {          // the only step that changes the box
+    try { if (session.state === 'armed') await session.reconfigure(); else await session.arm(); }
+    catch (e) { log('Arm failed: ' + e.message); banner('faultBanner', '<b>Could not start.</b> ' + e.message); return false; }
+    return true;
+  }
+  function openLive(title) {
+    showSetup(false); show('cardConnect', false); show('cardLive', true); $('liveTitle').textContent = title;
+    const auto = session.mode === 'auto';
+    for (const ch of CH) {
+      show('row_' + ch, session.driven(ch));
+      if (ch === 'm') continue;
+      $('mk_' + ch).style.left = 'calc(' + session.max[ch] + '% - 1px)';
+      show('dn_' + ch, auto);
+    }
+    $('btnStop').disabled = false; setConn('running', 'ok');
+    startTimers();
+  }
+
+  $('btnAuto').onclick = async () => {
+    const step = +$('stepSec').value;
+    if (!(step >= 10 && step <= 900)) { banner('noteBanner', 'Choose an interval between 10 and 900 seconds.'); return; }
+    if (!confirmStart('Start auto-climb: +1% every ' + step + ' s')) return;
+    if (!(await takeControl())) return;
+    session.startAuto(step);
+    show('autoPanel', true); show('remotePanel', false); $('btnPause').textContent = 'Pause';
+    openLive('Auto-climb');
+  };
+
+  $('btnRemote').onclick = async () => {
+    let base = '';
+    if (isFile) { base = $('hostedUrl').value.trim(); if (!/^https?:\/\//.test(base)) { banner('noteBanner', 'For remote control, this page has to be hosted at a web address so the other person can open it. Put the page somewhere (see the note I gave you), then paste its address into the box in the Remote control panel.'); return; } store.set('et312-hosted', base); }
+    else base = location.href.split('#')[0];
+    if (!confirmStart('Start remote control')) return;
+    // get the internet side working first, so a network problem never leaves the box under software control for nothing
+    try { await loadPeerJS(); }
+    catch (e) { banner('faultBanner', e.message + ' Nothing was changed on the box.'); return; }
+    const id = ET.randId();
+    try {
+      peer = new window.Peer(id, { debug: 0 });
+      await new Promise((res, rej) => { peer.on('open', res); peer.on('error', rej); });
+    } catch (e) { banner('faultBanner', 'Could not reach the PeerJS connection service: ' + (e.type || e.message) + '. Nothing was changed on the box.'); try { peer.destroy(); } catch (_) {} peer = null; return; }
+    if (!(await takeControl())) { try { peer.destroy(); } catch (_) {} peer = null; return; }
+    peer.on('error', er => log('Peer error: ' + (er.type || er.message)));
+    session.startRemote();
+    host = new ET.RemoteHost(session, onRemoteEvent);
+    peer.on('connection', c => host.accept(c));
+    linkText = base.split('#')[0] + '#c=' + id;
+    $('linkBox').textContent = linkText;
+    show('autoPanel', false); show('remotePanel', true); renderRemote();
+    openLive('Remote control');
+    pushTimer = setInterval(() => host && host.pushState(), 500);
+  };
+  $('btnCopy').onclick = async () => { try { await navigator.clipboard.writeText(linkText); $('btnCopy').textContent = 'Copied'; setTimeout(() => $('btnCopy').textContent = 'Copy link', 1500); } catch (_) { banner('noteBanner', 'Select the link and copy it by hand.'); } };
+  $('btnAllow').onclick = () => host && host.allow();
+  $('btnRefuse').onclick = () => host && host.refuse();
+  $('btnKick').onclick = () => host && host.kick();
+  $('btnResume').onclick = () => { session.resumeRemote(); renderRemote(); };
+
+  function onRemoteEvent(type) {
+    if (type === 'request') { show('reqBox', true); log('A controller opened the link and is waiting for approval.'); }
+    if (type === 'cleared' || type === 'attached') show('reqBox', false);
+    if (type === 'attached') log('Controller allowed.');
+    if (type === 'detached') log('Controller disconnected.');
+    renderRemote();
+  }
+  function renderRemote() {
+    if (!session) return;
+    const r = session.remote, pending = host && host.pending;
+    let t = 'waiting for them to open the link';
+    if (pending) t = 'someone is waiting for your approval';
+    if (r.connected) t = r.lost ? 'controller connected but not responding — output at zero' : (r.locked ? 'paused — you pressed STOP' : 'controller connected');
+    $('remoteState').textContent = t;
+    show('btnResume', r.locked); show('btnKick', r.connected);
+  }
+
+  /* ----- live controls ----- */
+  $('btnStop').onclick = () => session && session.stop();
+  for (const ch of AB) $('dn_' + ch).onclick = () => session && session.nudgeDown(ch);
+  $('btnPause').onclick = () => { if (!session) return; const p = !session.auto.paused; session.pauseAuto(p); $('btnPause').textContent = p ? 'Resume' : 'Pause'; renderLevels(session.snapshot()); };
+  document.addEventListener('keydown', e => {
+    if (!session || session.state !== 'armed') return;
+    if (e.key === 'Escape' || (e.key === ' ' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))) { e.preventDefault(); session.stop(); }
+  }, true);
+  $('btnEnd').onclick = async () => {
+    if (!session) return;
+    if (pushTimer) { clearInterval(pushTimer); pushTimer = null; }
+    if (host) { host.shutdown(); host = null; } if (peer) { try { peer.destroy(); } catch (_) {} peer = null; }
+    session.backToSetup();                    // zero; the box stays under our control, held at zero, and keeps being checked
+    show('cardLive', false); show('cardConnect', true); showSetup(true); show('remotePanel', false); show('autoPanel', false); show('reqBox', false);
+    banner('noteBanner', 'Session ended. The box is held at zero. Change the settings if you like and start another run.');
+    setConn('connected, held at zero', 'ok');
+  };
+
+  function startTimers() { stopTimers(); timer = setInterval(() => session && session.tick(), 100); }
+  function stopTimers() { if (timer) clearInterval(timer); timer = null; if (pushTimer) clearInterval(pushTimer); pushTimer = null; }
+
+  /* ----- session events -> DOM ----- */
+  function onEvent(type, d) {
+    if (type === 'log') log(d);
+    else if (type === 'levels') renderLevels(d);
+    else if (type === 'warn') banner('noteBanner', d);
+    else if (type === 'fault') onFault(d);
+    else if (type === 'closed') onClosed(d);
+    else if (type === 'remote') renderRemote();
+    else if (type === 'mode') { if (d === 'none' && session && session.state === 'armed') $('liveTitle').textContent = 'Stopped'; }
+    else if (type === 'state') setConn(d === 'armed' ? 'running' : d === 'fault' ? 'FAULT' : d === 'held' ? 'held at zero' : d === 'connected' ? 'connected (read-only)' : 'not connected', d === 'armed' || d === 'connected' ? 'ok' : d === 'fault' ? 'bad' : '');
+  }
+  function pillText(s) {
+    if (s.mode === 'none') return 'stopped';
+    if (s.mode === 'auto') return s.ramp.active ? 'ramping up' : (s.auto.paused ? 'paused' : 'climbing');
+    const r = s.remote;
+    if (!r.connected) return 'waiting for controller';
+    return r.locked ? 'paused' : r.lost ? 'no signal' : s.ramp.active ? 'ramping up' : 'live';
+  }
+  function renderLevels(s) {
+    if (!session) return;
+    for (const ch of CH) {
+      if (!session.driven(ch)) continue;
+      const raw = s.cmd[ch], conf = s.confirmed ? s.confirmed[ch] : null;
+      $('lv_' + ch).textContent = session.pctOf(ch, raw) + '%';          // derived from the byte actually sent, rounded down
+      $('bar_' + ch).style.width = Math.min(100, s.level[ch]) + '%';
+      $('tx_' + ch).textContent = 'byte ' + raw + (ch === 'm' ? ' · fixed' : ' · max ' + s.max[ch] + '%') + (conf !== null && conf !== undefined && conf !== raw ? ' · box reads ' + conf : '');
+    }
+    $('livePill').textContent = pillText(s);
+    if (s.mode === 'auto') {
+      const atMax = AB.every(ch => !session.driven(ch) || s.level[ch] >= s.max[ch] - 0.001);
+      $('autoCount').textContent = s.ramp.active ? 'Ramping up · ' + Math.ceil(s.ramp.left) + ' s left, then +1% every ' + s.auto.stepSec + ' s'
+        : s.auto.paused ? 'Paused · +' + s.auto.steps + '% so far'
+        : atMax ? 'At the maximum — holding'
+        : '+' + s.auto.steps + '% so far · next +1% in ' + Math.ceil(s.auto.nextIn) + ' s';
+    } else if (s.mode === 'none') $('autoCount').textContent = 'Stopped';
+  }
+  function onFault(d) {
+    stopTimers(); if (host) host.shutdown();
+    banner('faultBanner', d.zeroConfirmed
+      ? '<b>Fault: ' + d.reason + '</b><br>The box was told to go to zero and the readback confirms A=0, B=0. Switch it off and on before reconnecting.'
+      : '<b>FAULT — COULD NOT CONFIRM THE OUTPUT IS ZERO.</b><br>' + d.reason + '<br><b>Switch the box off now</b> (or remove the electrodes).');
+    $('btnStop').disabled = true;
+    try { if (transport) transport.close(); } catch (_) {}
+    show('cardConnect', true); show('btnConnect', true); show('btnSim', true); show('btnDisconnect', false); showSetup(false);
+  }
+  function onClosed(d) {
+    stopTimers(); if (simTimer) { clearInterval(simTimer); simTimer = null; }
+    if (peer) { try { peer.destroy(); } catch (_) {} peer = null; } host = null;
+    show('cardLive', false); show('cardConnect', true); showSetup(false); show('remotePanel', false); show('autoPanel', false);
+    show('btnConnect', true); show('btnSim', true); show('btnDisconnect', false);
+    $('btnStop').disabled = false;
+    setConn('not connected', '');
+    if (d.held) banner('noteBanner', d.zeroConfirmed ? 'Disconnected. The box is <b>held at zero</b> with its knobs disabled. Switch it off and on to use the knobs again.' : '<b>Disconnected, but zero could not be confirmed.</b> Switch the box off.');
+    session = null;
+  }
+
+  /* ----- simulator tools ----- */
+  $('simDrop').onclick = e => { if (!sim) return; sim.faults.dropAck = !sim.faults.dropAck; e.target.textContent = 'Drop acks: ' + (sim.faults.dropAck ? 'ON' : 'off'); };
+  $('simSilent').onclick = e => { if (!sim) return; sim.faults.silent = !sim.faults.silent; e.target.textContent = 'Go silent: ' + (sim.faults.silent ? 'ON' : 'off'); };
+  $('simCycle').onclick = () => { if (sim) { sim.powerCycle(); log('Sim box power-cycled.'); } };
+
+  /* ----- guards ----- */
+  window.addEventListener('beforeunload', e => { if (session && session.state === 'armed') { try { session.stop('Page closing'); } catch (_) {} e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('pagehide', () => { if (session && session.state === 'armed') { try { session.stop('Page hidden/closing'); } catch (_) {} } });
+  if ('serial' in navigator) navigator.serial.addEventListener('disconnect', () => {
+    log('USB serial device disconnected.');
+    if (session && session.state === 'armed') session._fault(new Error('The USB cable was disconnected while running'));
+  });
+}
+
+/* ===================================================================== */
+/* CONTROLLER VIEW (opened from the shared link)                         */
+/* ===================================================================== */
+function controllerView(id) {
+  show('hostView', false); show('ctlView', true);
+  const say = (html, bad) => { const b = $('ctlBanner'); b.innerHTML = html; b.className = 'banner' + (bad ? ' bad' : ''); show('ctlBanner', true); };
+  let conn = null, peer = null, live = false, last = Date.now(), maxP = { a: 0, b: 0 }, driven = { a: false, b: false };
+  const val = { a: 0, b: 0 };
+  const send = o => { try { if (conn && conn.open) conn.send(o); } catch (_) {} };
+  const push = () => send({ t: 'set', a: val.a, b: val.b });
+  function render() { for (const ch of AB) { $('cVal_' + ch).textContent = val[ch] + '%'; if ($('cSl_' + ch).value != val[ch]) $('cSl_' + ch).value = val[ch]; } }
+  function zeroAll() { for (const ch of AB) val[ch] = 0; render(); }
+  function setVal(ch, v) { val[ch] = ET.clamp(Math.round(v), 0, maxP[ch]); render(); push(); }
+
+  for (const ch of AB) {
+    $('cSl_' + ch).oninput = e => setVal(ch, +e.target.value);
+    $('cUp_' + ch).onclick = () => setVal(ch, val[ch] + 1);
+    $('cDn_' + ch).onclick = () => setVal(ch, val[ch] - 1);
+  }
+  $('ctlStop').onclick = () => { zeroAll(); send({ t: 'stop' }); push(); };
+  document.addEventListener('keydown', e => { if (live && (e.key === 'Escape' || e.key === ' ' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))) { e.preventDefault(); $('ctlStop').onclick(); } }, true);
+
+  // heartbeat; if this page's timers were frozen (phone locked, tab hidden) start again from zero
+  setInterval(() => {
+    const now = Date.now();
+    if (live && now - last > 2500) { zeroAll(); }
+    last = now;
+    if (live) push();
+  }, 1000);
+
+  loadPeerJS().then(() => {
+    peer = new window.Peer({ debug: 0 });
+    peer.on('error', e => say(e.type === 'peer-unavailable' ? 'The host is not available. Check the link, or ask them to start again.' : 'Connection problem: ' + (e.type || e.message), true));
+    peer.on('open', () => {
+      conn = peer.connect(id, { reliable: true, serialization: 'json' });
+      say('Connecting to the host&hellip;');
+      conn.on('data', m => {
+        if (!m || typeof m !== 'object') return;
+        if (m.t === 'wait') say('Waiting for the host to allow you&hellip;');
+        else if (m.t === 'busy') say('Someone else is already connected to this host.', true);
+        else if (m.t === 'refused') say('The host declined the connection.', true);
+        else if (m.t === 'ended') { live = false; say('The host ended your session.', true); show('ctlBody', false); }
+        else if (m.t === 'hello') {
+          maxP = Object.assign({ a: 0, b: 0 }, m.max); driven = Object.assign({ a: false, b: false }, m.driven);
+          const ini = Object.assign({ a: 0, b: 0 }, m.init);
+          for (const ch of AB) { show('cRow_' + ch, !!driven[ch]); $('cSl_' + ch).max = maxP[ch]; $('cInfo_' + ch).textContent = 'host maximum ' + maxP[ch] + '%'; val[ch] = ET.clamp(Math.round(ini[ch]), 0, maxP[ch]); }
+          render(); live = true; last = Date.now(); show('ctlBody', true); show('ctlBanner', false); push();
+        } else if (m.t === 'state') {
+          if (m.lost) say('Host has lost contact with you — output is at zero. Move a slider to continue.', true);
+          else if (m.locked) say('The host pressed STOP. Waiting for them to resume.', true);
+          else show('ctlBanner', false);
+          if (m.locked || m.lost) zeroAll();
+        }
+      });
+      conn.on('close', () => { live = false; show('ctlBody', false); say('Connection closed.', true); });
+      conn.on('error', () => { live = false; say('Connection error.', true); });
+    });
+  }).catch(e => say(e.message, true));
+}
+})();
+</script>
+</body>
+</html>
