@@ -94,12 +94,20 @@
   #log{font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;max-height:220px;overflow:auto;white-space:pre-wrap;color:var(--muted);margin-top:10px}
   .tgl{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:10px}
 
+  /* modes the other person may choose (settings) */
+  details.modesel{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+  details.modesel summary{cursor:pointer;font-size:14px;font-weight:600}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px 12px;margin:12px 0 10px}
+  .mchk{display:flex;align-items:center;gap:8px;font-size:14px;min-height:32px}
+  .mchk input{width:18px;height:18px;accent-color:var(--accent)}
+
   /* controller page */
   .cbox{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--card);margin:12px 0}
   .cbox .t{display:flex;justify-content:space-between;align-items:baseline;font-weight:650}
   .cbox .v{font-size:52px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
   .cbox input[type=range]{width:100%;height:48px;accent-color:var(--accent);margin:6px 0}
   .cbox .row{justify-content:space-between}
+  .cbox select{width:100%;font:inherit;font-size:17px;min-height:48px;padding:8px 10px;margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
   .cbtns{display:flex;gap:10px}
   .cbtns .btn{min-width:84px;min-height:48px;font-size:17px}
 
@@ -159,6 +167,11 @@
       <span class="na">stays at its level</span>
     </div>
     <p class="hint">Percent of each knob&rsquo;s travel. A and B rise from 0 to their start level over the ramp time; multi-adjust jumps straight to its value and stays there (empty the box to leave it alone). Anything that raises A or B later stops at the maximum.</p>
+    <details class="modesel" id="modeSel"><summary>Modes the other person can choose (remote control)</summary>
+      <div class="mgrid"><label class="mchk"><input type="checkbox" id="mode_118" checked>Waves</label><label class="mchk"><input type="checkbox" id="mode_119" checked>Stroke</label><label class="mchk"><input type="checkbox" id="mode_120" checked>Climb</label><label class="mchk"><input type="checkbox" id="mode_121" checked>Combo</label><label class="mchk"><input type="checkbox" id="mode_122" checked>Intense</label><label class="mchk"><input type="checkbox" id="mode_123" checked>Rhythm</label><label class="mchk"><input type="checkbox" id="mode_124" checked>Audio 1</label><label class="mchk"><input type="checkbox" id="mode_125" checked>Audio 2</label><label class="mchk"><input type="checkbox" id="mode_126" checked>Audio 3</label><label class="mchk"><input type="checkbox" id="mode_128" checked>Random 1</label><label class="mchk"><input type="checkbox" id="mode_129" checked>Random 2</label><label class="mchk"><input type="checkbox" id="mode_130" checked>Toggle</label><label class="mchk"><input type="checkbox" id="mode_131" checked>Orgasm</label><label class="mchk"><input type="checkbox" id="mode_132" checked>Torment</label><label class="mchk"><input type="checkbox" id="mode_133" checked>Phase 1</label><label class="mchk"><input type="checkbox" id="mode_134" checked>Phase 2</label><label class="mchk"><input type="checkbox" id="mode_135" checked>Phase 3</label></div>
+      <div class="row"><button class="btn sm" id="modeAll">Tick all</button><button class="btn sm" id="modeNone">Untick all</button></div>
+      <p class="hint">Untick any you don&rsquo;t want them to pick. Audio modes need something plugged into the box&rsquo;s audio input. Split and the User modes aren&rsquo;t offered. The box&rsquo;s own level limits still apply, and A and B stay within your maximums in every mode.</p>
+    </details>
   </section>
 
   <section class="card hidden" id="cardMode">
@@ -200,6 +213,8 @@
         <div class="bar"><i id="bar_m" style="background:var(--cM)"></i></div>
         <div class="sub" id="tx_m"></div></div>
     </div>
+
+    <p class="status" id="modeRow" style="margin-top:12px">Mode: <b id="modeNow">&ndash;</b></p>
 
     <div id="autoPanel" class="panel hidden">
       <div class="row" style="justify-content:space-between">
@@ -246,6 +261,8 @@
       <div class="v" id="cVal_b">0%</div>
       <input type="range" id="cSl_b" min="0" max="60" step="1" value="0" aria-label="Channel B">
       <div class="row"><span></span><span class="cbtns"><button class="btn" id="cDn_b">&#9660; 1%</button><button class="btn" id="cUp_b">&#9650; 1%</button></span></div></div>
+    <div class="cbox hidden" id="cModeBox"><div class="t"><span>Mode</span><span id="cModeInfo" style="font-weight:400;color:var(--muted);font-size:13px"></span></div>
+      <select id="cMode" aria-label="Mode"></select></div>
     <p class="hint">Keep this page open and in front. If it loses contact for a few seconds, everything drops to zero. The host can stop or disconnect you at any time. The slider range is the host&rsquo;s maximum.</p>
   </div>
 </div>
@@ -256,10 +273,18 @@
 const ET = (() => {
 'use strict';
 
-const ADDR = { MODEL:0x00fc, FW:0x00fd, FLAGS:0x400f, LEVEL_A:0x4064, LEVEL_B:0x4065, MA:0x420d, MA_MIN:0x4086, MA_MAX:0x4087, POWER:0x41f4, CIPHER:0x4213 };
+const ADDR = { MODEL:0x00fc, FW:0x00fd, FLAGS:0x400f, LEVEL_A:0x4064, LEVEL_B:0x4065, MA:0x420d, MA_MIN:0x4086, MA_MAX:0x4087, POWER:0x41f4, CIPHER:0x4213, BOXMODE:0x407b, CMD:0x4070 };
 const FLAG_ADC_OFF = 0x01;               // $400f bit0: ignore the pots, take levels from RAM
 const CH = ['a', 'b', 'm'];
 const NAME = { a: 'Channel A', b: 'Channel B', m: 'Multi-adjust' };
+/** The box's built-in programs ("modes") that can be switched by this page. n is the value the box keeps at $407b.
+ *  Split (0x7f) and User 1-7 (0x88-0x8e) are left out: Split needs its own set-up, and User modes only exist if the owner has programmed them. */
+const MODES = [
+  { n: 0x76, name: 'Waves' }, { n: 0x77, name: 'Stroke' }, { n: 0x78, name: 'Climb' }, { n: 0x79, name: 'Combo' },
+  { n: 0x7a, name: 'Intense' }, { n: 0x7b, name: 'Rhythm' }, { n: 0x7c, name: 'Audio 1' }, { n: 0x7d, name: 'Audio 2' },
+  { n: 0x7e, name: 'Audio 3' }, { n: 0x80, name: 'Random 1' }, { n: 0x81, name: 'Random 2' }, { n: 0x82, name: 'Toggle' },
+  { n: 0x83, name: 'Orgasm' }, { n: 0x84, name: 'Torment' }, { n: 0x85, name: 'Phase 1' }, { n: 0x86, name: 'Phase 2' }, { n: 0x87, name: 'Phase 3' }];
+const modeName = n => { const m = MODES.find(x => x.n === n); return m ? m.name : n === 0x7f ? 'Split' : (n >= 0x88 && n <= 0x8e) ? 'User ' + (n - 0x87) : 'mode 0x' + Number(n).toString(16); };
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const hex = u8 => Array.from(u8, b => b.toString(16).padStart(2, '0')).join(' ');
@@ -393,8 +418,9 @@ class SimBox {
     this.potA = o.potA ?? 0; this.potB = o.potB ?? 0; this.potM = o.potM ?? 128;
     this.ram[0x41f4] = o.powerLevel ?? 0;
     this.ram[0x4086] = 0x0f; this.ram[0x4087] = 0xff;      // multi-adjust range, as documented defaults
+    this.ram[0x407b] = o.mode ?? 0x76; this.ram[0x4070] = 0xff; this.ram[0x4071] = 0xff; this.modeLog = [];   // current mode and the two command slots (0xff = no command)
     this.fixedBoxKey = o.boxKey ?? null;
-    this.faults = { dropAck: false, silent: false };
+    this.faults = { dropAck: false, silent: false, ignoreModeCmd: false };
     this.out = () => {}; this.rx = []; this.need = 0;
     this.stats = { rejected: 0, writes: 0 };
     this._adc();
@@ -402,7 +428,7 @@ class SimBox {
   get cipher() { return this.ram[0x4213]; }
   _adc() { if (!(this.ram[0x400f] & 1)) { this.ram[0x4064] = this.potA & 255; this.ram[0x4065] = this.potB & 255; this.ram[0x420d] = this.potM & 255; } }
   effective() { this._adc(); return { a: this.ram[0x4064], b: this.ram[0x4065], m: this.ram[0x420d] }; }
-  powerCycle() { const p = this.ram[0x41f4]; this.ram.fill(0); this.ram[0x41f4] = p; this.ram[0x4086] = 0x0f; this.ram[0x4087] = 0xff; this.rx = []; this._adc(); }
+  powerCycle() { const p = this.ram[0x41f4]; this.ram.fill(0); this.ram[0x41f4] = p; this.ram[0x4086] = 0x0f; this.ram[0x4087] = 0xff; this.ram[0x4070] = 0xff; this.ram[0x4071] = 0xff; this.rx = []; this._adc(); }
   read(addr) {
     if (addr < 0x100) return this.flash[addr];
     if (addr >= 0x4000 && addr < 0x4400) { this._adc(); return this.ram[addr]; }
@@ -442,6 +468,8 @@ class SimBox {
     }
     const n = m.length - 4, addr = (m[1] << 8) | m[2];
     for (let i = 0; i < n; i++) this.write(addr + i, m[3 + i]);
+    // 'exit menu' (0x04) then 'select new mode' (0x12): the box switches to the mode held at $407b and clears the command slots
+    if (this.ram[0x4070] === 0x04 && this.ram[0x4071] === 0x12 && !this.faults.ignoreModeCmd) { this.modeLog.push(this.ram[0x407b]); this.ram[0x4070] = 0xff; this.ram[0x4071] = 0xff; }
     this.stats.writes++;
     if (!this.faults.dropAck) this.out([0x06]);
   }
@@ -463,7 +491,7 @@ function slew(cur, target, dt, upPerSec, downPerSec) {
 class Session {
   constructor(box, opts = {}) {
     this.box = box;
-    this.cfg = Object.assign({ initial: { a: 45, b: 45, m: 50 }, maxPct: { a: 60, b: 60 }, rampSec: 10, upPct: 4, downPct: 50, verifyMs: 1000, deadmanMs: 4000, clock: () => performance.now() }, opts);
+    this.cfg = Object.assign({ initial: { a: 45, b: 45, m: 50 }, maxPct: { a: 60, b: 60 }, rampSec: 10, upPct: 4, downPct: 50, verifyMs: 1000, deadmanMs: 4000, modeGapMs: 1500, allowedModes: MODES.map(m => m.n), clock: () => performance.now() }, opts);
     this.clock = this.cfg.clock;
     this.state = 'idle';                 // idle | connected | armed | held | fault
     this.info = {};
@@ -479,6 +507,7 @@ class Session {
     this.stepSec = 120; this.auto = { activeMs: 0, paused: false };
     this.remote = { connected: false, lastHb: 0, locked: false, lost: false };
     this._pumping = null; this._running = false; this._hold = false;
+    this.boxMode = null; this._modeReq = null; this._lastModeChange = -1e9;   // the box's current mode (a number), a pending change, and the time of the last change
     this._last = 0; this._lastVerify = 0; this._verifyFails = 0; this._maWarned = false;
     this.faultInfo = null;
     this.onEvent = () => {};
@@ -522,6 +551,7 @@ class Session {
     this.info.flags = await this.box.readByte(ADDR.FLAGS);
     this.info.knobsDisabled = !!(this.info.flags & FLAG_ADC_OFF);
     await this._readMA();
+    this.info.mode = await this.box.readByte(ADDR.BOXMODE); this.boxMode = this.info.mode;
     this.setState('connected');
     return this.info;
   }
@@ -562,7 +592,7 @@ class Session {
     }
     this.level = { a: 0, b: 0, m: this.init.m ?? 0 }; this.user = { a: 0, b: 0 }; this.offset = { a: 0, b: 0 };
     this.cmd = { a: 0, b: 0, m: m0 }; this.written = { a: 0, b: 0, m: m0 }; this.confirmed = { a: 0, b: 0, m: m0 };
-    this.mode = 'none'; this.ramp = null; this._verifyFails = 0; this._maWarned = false;
+    this.mode = 'none'; this.ramp = null; this._verifyFails = 0; this._maWarned = false; this._modeReq = null;
     this._lastVerify = this.clock(); this._last = this.clock();
     this.setState('armed');
     this.log('Armed. Start A ' + this.init.a + '%, B ' + this.init.b + '%, multi-adjust ' + (this.init.m === null ? 'left alone' : this.init.m + '%') + '; maximum A ' + this.max.a + '%, B ' + this.max.b + '%; ramp ' + this.rampSec + ' s. Output is 0.');
@@ -626,7 +656,7 @@ class Session {
     if (this.state === 'armed') this._pump();
   }
   resumeRemote() { if (this.mode === 'remote') { this.remote.locked = false; this.remote.lost = false; this.log('Remote control resumed.'); this.emit('remote', { locked: false }); } }
-  backToSetup() { this.stop('Session ended', { lock: false }); this.mode = 'none'; this.ramp = null; this.remote = { connected: false, lastHb: 0, locked: false, lost: false }; this.emit('mode', this.mode); }
+  backToSetup() { this.stop('Session ended', { lock: false }); this._modeReq = null; this.mode = 'none'; this.ramp = null; this.remote = { connected: false, lastHb: 0, locked: false, lost: false }; this.emit('mode', this.mode); }
 
   /* ---- remote controller inputs ---- */
   remoteAttach() {
@@ -643,6 +673,29 @@ class Session {
     }
     this.remote.lastHb = this.clock();
     if (this.remote.lost) { this.remote.lost = false; this.emit('remote', { lost: false }); }
+  }
+
+  /* ---- switching the box's mode (Waves, Stroke, Audio 1, ...) ---- */
+  modeAllowed(n) { return Number.isInteger(n) && MODES.some(m => m.n === n) && this.cfg.allowedModes.includes(n); }
+  allowedList() { return MODES.filter(m => this.cfg.allowedModes.includes(m.n)).map(m => ({ n: m.n, name: m.name })); }
+  /** Ask for a mode change. Returns { ok, reason? }. Refused if not running, not on the allowed list, or too soon after the last change. */
+  requestMode(n, who = 'You') {
+    n = Number(n);
+    if (this.state !== 'armed') return { ok: false, reason: 'not running' };
+    if (!this.modeAllowed(n)) { this.log(who + ' asked for a mode that is not allowed (' + modeName(n) + ').'); return { ok: false, reason: 'not allowed' }; }
+    if (n === this.boxMode) return { ok: true, same: true };
+    const now = this.clock();
+    if (now - this._lastModeChange < this.cfg.modeGapMs) return { ok: false, reason: 'too soon' };
+    this._lastModeChange = now; this._modeReq = n;
+    this.log(who + ' chose mode ' + modeName(n) + '.');
+    this._pump();
+    return { ok: true };
+  }
+  /** A mode request from the remote controller: only honoured while they are connected, not paused and not out of contact. */
+  remoteMode(n) {
+    const r = this.remote;
+    if (this.mode !== 'remote' || !r.connected || r.locked || r.lost) return { ok: false, reason: 'paused' };
+    return this.requestMode(n, 'Controller');
   }
 
   /** Call about every 100 ms while armed. */
@@ -677,7 +730,7 @@ class Session {
   snapshot() {
     const now = this.clock(), ramping = this._ramping(now);
     const nextIn = this.mode === 'auto' && !ramping ? this.stepSec - ((this.auto.activeMs / 1000) % this.stepSec) : null;
-    return { state: this.state, mode: this.mode, level: { ...this.level }, max: { ...this.max }, init: { ...this.init }, cmd: { ...this.cmd },
+    return { state: this.state, mode: this.mode, boxMode: this.boxMode, level: { ...this.level }, max: { ...this.max }, init: { ...this.init }, cmd: { ...this.cmd },
       confirmed: this.confirmed && { ...this.confirmed },
       ramp: { active: ramping, left: ramping ? Math.max(0, this.ramp.sec - (now - this.ramp.startMs) / 1000) : 0 },
       auto: { paused: this.auto.paused, stepSec: this.stepSec, nextIn, steps: this._steps() },
@@ -699,6 +752,7 @@ class Session {
         const w = this.written, c = this.cmd;
         if (!w || w.a !== c.a || w.b !== c.b) { await this._writeAB(c.a, c.b); continue; }
         if (w.m !== c.m) { await this._writeM(c.m); continue; }
+        if (this._modeReq !== null) { const n = this._modeReq; this._modeReq = null; await this._applyMode(n); continue; }
         if (this.clock() - this._lastVerify >= this.cfg.verifyMs) { await this._verify(); continue; }
         break;
       }
@@ -723,11 +777,30 @@ class Session {
     }
     this.written = { ...this.written, m };
   }
+  async _applyMode(n) {
+    const go = async () => {
+      await this.box.writeBytes(ADDR.BOXMODE, [n]);          // the mode we want
+      await this.box.writeBytes(ADDR.CMD, [0x04, 0x12]);     // command 1: exit menu, command 2: select new mode
+      await sleep(60);                                       // the box needs about 18 ms to act on it
+    };
+    try { await go(); }
+    catch (e) {
+      this.log('Mode change failed (' + e.message + '); resynchronising and retrying once.');
+      if (!(await this.box.sync())) throw e;
+      await go();
+    }
+    const back = await this.box.readByte(ADDR.BOXMODE);
+    this.boxMode = back;
+    if (back !== n) { this.log('Mode readback differs (box has ' + modeName(back) + ', asked for ' + modeName(n) + ').'); this.emit('warn', 'The box did not report the mode I asked for (it says ' + modeName(back) + ', I asked for ' + modeName(n) + '). Check the box display.'); }
+    this.emit('boxmode', { n: this.boxMode });
+  }
   async _verify() {
     this._lastVerify = this.clock();
     const w = this.written;
     const f = await this.box.readByte(ADDR.FLAGS), a = await this.box.readByte(ADDR.LEVEL_A), b = await this.box.readByte(ADDR.LEVEL_B), m = await this.box.readByte(ADDR.MA);
     this.confirmed = { a, b, m };
+    const bm = await this.box.readByte(ADDR.BOXMODE);       // also notices a mode changed on the box itself
+    if (bm !== this.boxMode) { this.boxMode = bm; this.emit('boxmode', { n: bm }); }
     if (!(f & FLAG_ADC_OFF) || a !== w.a || b !== w.b) {
       this._verifyFails++;
       this.log('Readback mismatch: box has A=' + a + ' B=' + b + ' flags=0x' + f.toString(16) + ', expected A=' + w.a + ' B=' + w.b + '.');
@@ -744,7 +817,7 @@ class Session {
   async _fault(err) {
     if (this.state === 'fault') return;
     for (const ch of ['a', 'b']) { this.level[ch] = 0; this.user[ch] = 0; }
-    this.cmd = { a: 0, b: 0, m: this.cmd.m };
+    this.cmd = { a: 0, b: 0, m: this.cmd.m }; this._modeReq = null;
     this.setState('fault');
     this.log('FAULT: ' + err.message);
     let zero = false;
@@ -805,7 +878,7 @@ class RemoteHost {
     if (!this.pending) return;
     this.conn = this.pending; this.pending = null;
     this.s.remoteAttach();
-    this._send(this.conn, { t: 'hello', max: { a: this.s.max.a, b: this.s.max.b }, init: { a: this.s.init.a, b: this.s.init.b }, driven: { a: this.s.driven('a'), b: this.s.driven('b'), m: false } });
+    this._send(this.conn, { t: 'hello', max: { a: this.s.max.a, b: this.s.max.b }, init: { a: this.s.init.a, b: this.s.init.b }, driven: { a: this.s.driven('a'), b: this.s.driven('b'), m: false }, modes: this.s.allowedList(), mode: this.s.boxMode });
     this.emit('attached');
   }
   refuse() {
@@ -824,6 +897,7 @@ class RemoteHost {
     if (conn !== this.conn || !m || typeof m !== 'object') return;
     if (m.t === 'set') this.s.remoteSet(m);
     else if (m.t === 'stop') this.s.stop('Controller pressed STOP', { lock: false });
+    else if (m.t === 'mode') { const r = this.s.remoteMode(m.n); this._send(conn, { t: 'modeack', n: Number(m.n), ok: r.ok, reason: r.reason || '' }); }
   }
   _closed(conn) {
     if (conn === this.pending) { this.pending = null; this.emit('cleared'); }
@@ -832,12 +906,12 @@ class RemoteHost {
   pushState() {
     if (!this.conn) return;
     const sn = this.s.snapshot(), p = ch => this.s.pctOf(ch, sn.cmd[ch]);
-    this._send(this.conn, { t: 'state', level: { a: p('a'), b: p('b') }, locked: sn.remote.locked, lost: sn.remote.lost, state: sn.state });
+    this._send(this.conn, { t: 'state', level: { a: p('a'), b: p('b') }, locked: sn.remote.locked, lost: sn.remote.lost, state: sn.state, mode: sn.boxMode });
   }
   shutdown() { for (const c of [this.conn, this.pending]) { if (c) { try { c.close(); } catch (_) {} } } this.conn = null; this.pending = null; }
 }
 
-return { ADDR, CH, NAME, ET312, ET312Error, ByteQueue, SimBox, SimTransport, WebSerialTransport, Session, RemoteHost,
+return { ADDR, CH, NAME, MODES, modeName, ET312, ET312Error, ByteQueue, SimBox, SimTransport, WebSerialTransport, Session, RemoteHost,
          slew, sum8, swapNibbles, clamp, sleep, hex, randId };
 })();
 </script>
@@ -917,7 +991,7 @@ function hostView() {
   $('btnSim').onclick = async () => {
     sim = new ET.SimBox({ potA: 100, potB: 100, potM: 90 });
     show('cardSim', true);
-    simTimer = setInterval(() => { const e = sim.effective(); $('simOut').textContent = 'sim box bytes: A ' + e.a + '  B ' + e.b + '  MA ' + e.m + '  (0-255)   key 0x' + sim.cipher.toString(16); }, 150);
+    simTimer = setInterval(() => { const e = sim.effective(); $('simOut').textContent = 'sim box bytes: A ' + e.a + '  B ' + e.b + '  MA ' + e.m + '  (0-255)   mode 0x' + sim.ram[0x407b].toString(16) + '   key 0x' + sim.cipher.toString(16); }, 150);
     await startSession(new ET.SimTransport(sim, { latencyMs: 6 }));
   };
   $('btnDisconnect').onclick = async () => { if (!session) return; stopTimers(); if (host) host.shutdown(); await session.shutdown(); };
@@ -928,6 +1002,7 @@ function hostView() {
     session.cfg.initial = { a: $('inA').value, b: $('inB').value, m: $('inM').value };
     session.cfg.maxPct = { a: $('maxA').value, b: $('maxB').value };
     session.cfg.rampSec = $('ramp').value;
+    session.cfg.allowedModes = ET.MODES.filter(m => $('mode_' + m.n).checked).map(m => m.n);
     try { return session._settings(); }
     catch (e) { banner('noteBanner', '<b>Check the settings.</b> ' + e.message); return null; }
   }
@@ -992,6 +1067,8 @@ function hostView() {
     pushTimer = setInterval(() => host && host.pushState(), 500);
   };
   $('btnCopy').onclick = async () => { try { await navigator.clipboard.writeText(linkText); $('btnCopy').textContent = 'Copied'; setTimeout(() => $('btnCopy').textContent = 'Copy link', 1500); } catch (_) { banner('noteBanner', 'Select the link and copy it by hand.'); } };
+  const tickModes = on => { for (const m of ET.MODES) $('mode_' + m.n).checked = on; };
+  $('modeAll').onclick = () => tickModes(true); $('modeNone').onclick = () => tickModes(false);
   $('btnAllow').onclick = () => host && host.allow();
   $('btnRefuse').onclick = () => host && host.refuse();
   $('btnKick').onclick = () => host && host.kick();
@@ -1043,9 +1120,11 @@ function hostView() {
     else if (type === 'fault') onFault(d);
     else if (type === 'closed') onClosed(d);
     else if (type === 'remote') renderRemote();
+    else if (type === 'boxmode') renderMode();
     else if (type === 'mode') { if (d === 'none' && session && session.state === 'armed') $('liveTitle').textContent = 'Stopped'; }
     else if (type === 'state') setConn(d === 'armed' ? 'running' : d === 'fault' ? 'FAULT' : d === 'held' ? 'held at zero' : d === 'connected' ? 'connected (read-only)' : 'not connected', d === 'armed' || d === 'connected' ? 'ok' : d === 'fault' ? 'bad' : '');
   }
+  function renderMode() { if (!session) return; const n = session.boxMode; $('modeNow').textContent = (n === null || n === undefined) ? '–' : ET.modeName(n); }
   function pillText(s) {
     if (s.mode === 'none') return 'stopped';
     if (s.mode === 'auto') return s.ramp.active ? 'ramping up' : (s.auto.paused ? 'paused' : 'climbing');
@@ -1062,7 +1141,7 @@ function hostView() {
       $('bar_' + ch).style.width = Math.min(100, s.level[ch]) + '%';
       $('tx_' + ch).textContent = 'byte ' + raw + (ch === 'm' ? ' · fixed' : ' · max ' + s.max[ch] + '%') + (conf !== null && conf !== undefined && conf !== raw ? ' · box reads ' + conf : '');
     }
-    $('livePill').textContent = pillText(s);
+    $('livePill').textContent = pillText(s); renderMode();
     if (s.mode === 'auto') {
       const atMax = AB.every(ch => !session.driven(ch) || s.level[ch] >= s.max[ch] - 0.001);
       $('autoCount').textContent = s.ramp.active ? 'Ramping up · ' + Math.ceil(s.ramp.left) + ' s left, then +1% every ' + s.auto.stepSec + ' s'
@@ -1111,7 +1190,7 @@ function hostView() {
 function controllerView(id) {
   show('hostView', false); show('ctlView', true);
   const say = (html, bad) => { const b = $('ctlBanner'); b.innerHTML = html; b.className = 'banner' + (bad ? ' bad' : ''); show('ctlBanner', true); };
-  let conn = null, peer = null, live = false, last = Date.now(), maxP = { a: 0, b: 0 }, driven = { a: false, b: false };
+  let conn = null, peer = null, live = false, last = Date.now(), maxP = { a: 0, b: 0 }, driven = { a: false, b: false }, modes = [];
   const val = { a: 0, b: 0 };
   const send = o => { try { if (conn && conn.open) conn.send(o); } catch (_) {} };
   const push = () => send({ t: 'set', a: val.a, b: val.b });
@@ -1125,6 +1204,23 @@ function controllerView(id) {
     $('cDn_' + ch).onclick = () => setVal(ch, val[ch] - 1);
   }
   $('ctlStop').onclick = () => { zeroAll(); send({ t: 'stop' }); push(); };
+  const clean = t => String(t).replace(/[<>&"']/g, '').slice(0, 24);
+  function fillModes(list) {
+    modes = Array.isArray(list) ? list.filter(x => x && Number.isFinite(+x.n) && typeof x.name === 'string').map(x => ({ n: +x.n, name: clean(x.name) })) : [];
+    $('cMode').innerHTML = '<option value="">choose a mode…</option>' + modes.map(x => '<option value="' + x.n + '">' + x.name + '</option>').join('');
+    show('cModeBox', modes.length > 0);
+  }
+  function showMode(n) {
+    if (typeof n !== 'number' || !modes.length) return;
+    const hit = modes.find(x => x.n === n);
+    if (document.activeElement !== $('cMode') && !$('cMode').disabled) $('cMode').value = hit ? String(n) : '';
+    if (!$('cMode').disabled) $('cModeInfo').textContent = 'now: ' + (hit ? hit.name : 'another mode');
+  }
+  $('cMode').onchange = e => {
+    const v = e.target.value; if (v === '') return;
+    send({ t: 'mode', n: +v }); $('cModeInfo').textContent = 'changing…'; $('cMode').disabled = true;
+    setTimeout(() => { $('cMode').disabled = false; }, 1700);
+  };
   document.addEventListener('keydown', e => { if (live && (e.key === 'Escape' || e.key === ' ' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))) { e.preventDefault(); $('ctlStop').onclick(); } }, true);
 
   // heartbeat; if this page's timers were frozen (phone locked, tab hidden) start again from zero
@@ -1151,12 +1247,16 @@ function controllerView(id) {
           maxP = Object.assign({ a: 0, b: 0 }, m.max); driven = Object.assign({ a: false, b: false }, m.driven);
           const ini = Object.assign({ a: 0, b: 0 }, m.init);
           for (const ch of AB) { show('cRow_' + ch, !!driven[ch]); $('cSl_' + ch).max = maxP[ch]; $('cInfo_' + ch).textContent = 'host maximum ' + maxP[ch] + '%'; val[ch] = ET.clamp(Math.round(ini[ch]), 0, maxP[ch]); }
+          fillModes(m.modes); showMode(m.mode);
           render(); live = true; last = Date.now(); show('ctlBody', true); show('ctlBanner', false); push();
         } else if (m.t === 'state') {
           if (m.lost) say('Host has lost contact with you — output is at zero. Move a slider to continue.', true);
           else if (m.locked) say('The host pressed STOP. Waiting for them to resume.', true);
           else show('ctlBanner', false);
           if (m.locked || m.lost) zeroAll();
+          showMode(m.mode);
+        } else if (m.t === 'modeack') {
+          if (!m.ok) $('cModeInfo').textContent = ({ 'too soon': 'too soon — wait a moment', 'not allowed': 'the host has not allowed that mode', 'paused': 'the host has paused control', 'not running': 'not running' })[m.reason] || 'not changed';
         }
       });
       conn.on('close', () => { live = false; show('ctlBody', false); say('Connection closed.', true); });
