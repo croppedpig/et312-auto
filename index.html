@@ -34,6 +34,13 @@
   .card-h h2{margin:0;font-size:16px;font-weight:650;flex:1}
   .badge{width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:13px;font-weight:700;display:grid;place-items:center;flex:none}
   .hint{font-size:13px;color:var(--muted);margin:12px 0 0}
+  .ib{display:inline-block;vertical-align:middle;margin-left:6px}
+  .card,.mode,.notice,.top{position:relative}
+  .info{width:22px;height:22px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--muted);font:italic 700 13px/1 Georgia,serif;cursor:help}
+  .info:hover,.info:focus{border-color:var(--accent);color:var(--accent);outline:none}
+  .tip{display:none;position:absolute;z-index:20;left:10px;right:10px;margin-top:30px;padding:10px 12px;background:var(--ink);color:var(--bg);border-radius:10px;font-family:inherit;font-weight:400;font-size:13px;line-height:1.45;text-align:left;text-transform:none;letter-spacing:0;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+  .tip b{font-weight:700}
+  .ib:hover .tip,.ib:focus-within .tip{display:block}
   .pill{display:inline-block;font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
   .pill.ok{color:var(--ok);border-color:var(--ok)} .pill.bad{color:var(--danger);border-color:var(--danger)}
 
@@ -101,6 +108,19 @@
   .mchk{display:flex;align-items:center;gap:8px;font-size:14px;min-height:32px}
   .mchk input{width:18px;height:18px;accent-color:var(--accent)}
 
+  /* Home Assistant switches */
+  .hagrid{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0}
+  @media(min-width:560px){.hagrid{grid-template-columns:1fr 1fr}}
+  .hagrid label.col{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+  details.modesel input[type=text],details.modesel input[type=password]{width:100%;font:inherit;font-size:14px;padding:9px 10px;min-height:40px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+  .swrow{display:grid;grid-template-columns:24px 1fr 84px 112px;gap:8px;align-items:center;margin:6px 0}
+  .swrow input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
+  .swrow select{font:inherit;font-size:13px;min-height:40px;padding:4px 6px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+  .swhead{display:grid;grid-template-columns:24px 1fr 84px 112px;gap:8px;font-size:12px;color:var(--muted);margin-top:8px}
+  .swlist{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .swlist button{min-height:48px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+  .swlist button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
   /* controller page */
   .cbox{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--card);margin:12px 0}
   .cbox .t{display:flex;justify-content:space-between;align-items:baseline;font-weight:650}
@@ -136,22 +156,22 @@
 <!-- ================= HOST VIEW (the PC with the cable) ================= -->
 <div id="hostView">
   <div class="top"><h1>ET312B</h1><span id="connState" class="pill">not connected</span></div>
-  <div class="notice"><b>While running, this page controls the box, not the knobs.</b> If the page or the PC stops, the box keeps its <b>last level</b> &mdash; switch it off. Limits are enforced by this page only.</div>
+  <div class="notice"><b>While running, this page controls the box, not the knobs.</b> <span class="ib"><button type="button" class="info" aria-label="More information">i</button><span class="tip" role="tooltip">If the page or the PC stops, the box keeps its <b>last level</b> &mdash; switch it off. Limits are enforced by this page only.</span></span></div>
   <div id="faultBanner" class="banner bad hidden"></div>
   <div id="noteBanner" class="banner hidden"></div>
 
   <section class="card" id="cardConnect">
-    <div class="card-h"><span class="badge">1</span><h2>Connect</h2></div>
+    <div class="card-h"><span class="badge">1</span><h2>Connect</h2><span class="ib r"><button type="button" class="info" aria-label="More information">i</button><span class="tip" role="tooltip">Plug the cable in, switch the box on and start a mode on it. Connecting only reads from the box. Use Chrome or Edge on a computer.</span></span></div>
     <div class="row">
       <button class="btn primary" id="btnConnect">Connect to box</button>
       <button class="btn hidden" id="btnSim">Simulator (testing)</button>
       <button class="btn hidden" id="btnDisconnect">Disconnect</button>
     </div>
-    <p class="hint" id="infoLine">Plug the cable in, switch the box on and start a mode on it. Connecting only reads from the box. Use Chrome or Edge on a computer.</p>
+    <p class="hint hidden" id="infoLine"></p>
   </section>
 
   <section class="card" id="cardSetup">
-    <div class="card-h"><span class="badge">2</span><h2>Settings</h2></div>
+    <div class="card-h"><span class="badge">2</span><h2>Settings</h2><span class="ib r"><button type="button" class="info" aria-label="More information">i</button><span class="tip" role="tooltip">Percent of each knob&rsquo;s travel. A and B rise from 0 to their start level over the ramp time; multi-adjust jumps straight to its value and stays there (empty the box to leave it alone). Anything that raises A or B later stops at the maximum.</span></span></div>
     <div class="sg">
       <span></span>
       <span class="h"><i class="dot" style="background:var(--cA)"></i><span><span class="full">Channel </span>A</span></span>
@@ -172,28 +192,42 @@
       <label class="field"><input type="number" id="maxB" min="0" max="100" step="1" value="60" inputmode="numeric" aria-label="Channel B maximum"><span class="u">%</span></label>
       <span class="na">stays at its level</span>
     </div>
-    <p class="hint">Percent of each knob&rsquo;s travel. A and B rise from 0 to their start level over the ramp time; multi-adjust jumps straight to its value and stays there (empty the box to leave it alone). Anything that raises A or B later stops at the maximum.</p>
     <details class="modesel" id="modeSel"><summary>Modes the Driver can choose</summary>
       <div class="mgrid"><label class="mchk"><input type="checkbox" id="mode_118" checked>Waves</label><label class="mchk"><input type="checkbox" id="mode_119" checked>Stroke</label><label class="mchk"><input type="checkbox" id="mode_120" checked>Climb</label><label class="mchk"><input type="checkbox" id="mode_121" checked>Combo</label><label class="mchk"><input type="checkbox" id="mode_122" checked>Intense</label><label class="mchk"><input type="checkbox" id="mode_123" checked>Rhythm</label><label class="mchk"><input type="checkbox" id="mode_124" checked>Audio 1</label><label class="mchk"><input type="checkbox" id="mode_125" checked>Audio 2</label><label class="mchk"><input type="checkbox" id="mode_126" checked>Audio 3</label><label class="mchk"><input type="checkbox" id="mode_128" checked>Random 1</label><label class="mchk"><input type="checkbox" id="mode_129" checked>Random 2</label><label class="mchk"><input type="checkbox" id="mode_130" checked>Toggle</label><label class="mchk"><input type="checkbox" id="mode_131" checked>Orgasm</label><label class="mchk"><input type="checkbox" id="mode_132" checked>Torment</label><label class="mchk"><input type="checkbox" id="mode_133" checked>Phase 1</label><label class="mchk"><input type="checkbox" id="mode_134" checked>Phase 2</label><label class="mchk"><input type="checkbox" id="mode_135" checked>Phase 3</label></div>
-      <div class="row"><button class="btn sm" id="modeAll">Tick all</button><button class="btn sm" id="modeNone">Untick all</button></div>
-      <p class="hint">Untick any you don&rsquo;t want them to pick. Audio modes need something plugged into the box&rsquo;s audio input. Split and the User modes aren&rsquo;t offered. The box&rsquo;s own level limits still apply, and A and B stay within your maximums in every mode.</p>
+      <div class="row"><button class="btn sm" id="modeAll">Tick all</button><button class="btn sm" id="modeNone">Untick all</button><span class="ib"><button type="button" class="info" aria-label="More information">i</button><span class="tip" role="tooltip">Untick any you don&rsquo;t want them to pick. Audio modes need something plugged into the box&rsquo;s audio input. Split and the User modes aren&rsquo;t offered. The box&rsquo;s own level limits still apply, and A and B stay within your maximums in every mode.</span></span></div>
+    </details>
+    <details class="modesel" id="haSel"><summary>Home Assistant switches (optional)</summary>
+      <div class="hagrid">
+        <label class="col">Broker address (WebSocket)<input type="text" id="mqttUrl" value="ws://192.168.111.5:1884" autocomplete="off" spellcheck="false"></label>
+        <label class="col">Topic starts with<input type="text" id="mqttPrefix" value="hardstim/switch/" autocomplete="off" spellcheck="false"></label>
+        <label class="col">MQTT username<input type="text" id="mqttUser" autocomplete="off" spellcheck="false"></label>
+        <label class="col">MQTT password<input type="password" id="mqttPass" autocomplete="off"></label>
+      </div>
+      <label class="mchk"><input type="checkbox" id="mqttSave"> Remember the password on this computer</label>
+      <div class="swhead"><span></span><span>Button label</span><span>Topic end</span><span>&ldquo;On&rdquo; sends</span></div>
+      <div class="swrow"><input type="checkbox" id="swOn_0" aria-label="Offer this switch"><input type="text" id="swName_0" maxlength="20" placeholder="Label" autocomplete="off"><input type="text" id="swTopic_0" placeholder="pp1" autocomplete="off" spellcheck="false"><select id="swPay_0" aria-label="Message that means on"><option value="CLOSE">CLOSE</option><option value="OPEN">OPEN</option></select></div>
+      <div class="swrow"><input type="checkbox" id="swOn_1" aria-label="Offer this switch"><input type="text" id="swName_1" maxlength="20" placeholder="Label" autocomplete="off"><input type="text" id="swTopic_1" placeholder="pp2" autocomplete="off" spellcheck="false"><select id="swPay_1" aria-label="Message that means on"><option value="CLOSE">CLOSE</option><option value="OPEN">OPEN</option></select></div>
+      <div class="swrow"><input type="checkbox" id="swOn_2" aria-label="Offer this switch"><input type="text" id="swName_2" maxlength="20" placeholder="Label" autocomplete="off"><input type="text" id="swTopic_2" placeholder="pp3" autocomplete="off" spellcheck="false"><select id="swPay_2" aria-label="Message that means on"><option value="CLOSE">CLOSE</option><option value="OPEN">OPEN</option></select></div>
+      <div class="swrow"><input type="checkbox" id="swOn_3" aria-label="Offer this switch"><input type="text" id="swName_3" maxlength="20" placeholder="Label" autocomplete="off"><input type="text" id="swTopic_3" placeholder="pp4" autocomplete="off" spellcheck="false"><select id="swPay_3" aria-label="Message that means on"><option value="CLOSE">CLOSE</option><option value="OPEN">OPEN</option></select></div>
+      <div class="swrow"><input type="checkbox" id="swOn_4" aria-label="Offer this switch"><input type="text" id="swName_4" maxlength="20" placeholder="Label" autocomplete="off"><input type="text" id="swTopic_4" placeholder="pp5" autocomplete="off" spellcheck="false"><select id="swPay_4" aria-label="Message that means on"><option value="CLOSE">CLOSE</option><option value="OPEN">OPEN</option></select></div>
+      <div class="swrow"><input type="checkbox" id="swOn_5" aria-label="Offer this switch"><input type="text" id="swName_5" maxlength="20" placeholder="Label" autocomplete="off"><input type="text" id="swTopic_5" placeholder="pp6" autocomplete="off" spellcheck="false"><select id="swPay_5" aria-label="Message that means on"><option value="CLOSE">CLOSE</option><option value="OPEN">OPEN</option></select></div>
+      <label class="mchk"><input type="checkbox" id="swSafe" checked> Turn them off when I press STOP, the session ends or the Driver leaves<span class="ib"><button type="button" class="info" aria-label="More information">i</button><span class="tip" role="tooltip">The &ldquo;off&rdquo; message is the opposite of the &ldquo;on&rdquo; one. If the broker can&rsquo;t be reached at that moment the page keeps trying until it can. Closing the page or losing the PC can&rsquo;t send anything, so don&rsquo;t rely on this for anything that must never be left on.</span></span></label>
+      <div class="row" style="margin-top:8px"><button class="btn sm" id="mqttTest">Test connection</button><span class="ib"><button type="button" class="info" aria-label="More information">i</button><span class="tip" role="tooltip">Connects to the broker with the details above and reports whether the login works. It sends no switch messages. Use a local copy of this page: a page opened from a web (https) address is not allowed to use a plain ws:// address.</span></span><span class="hint" style="margin:0" id="mqttStatus"></span></div>
     </details>
   </section>
 
   <section class="card" id="cardMode">
     <div class="card-h"><span class="badge">3</span><h2>How should it run?</h2></div>
     <p class="hint" id="needConnect" style="margin:-4px 0 12px">Connect to the box (step 1) to enable these.</p>
-    <div class="modebar" id="sModeBar"><label for="sMode">Mode</label><select id="sMode" aria-label="Box mode"></select><span class="hint">The mode the box switches to when you start. You can change it again while running.</span></div>
+    <div class="modebar" id="sModeBar"><label for="sMode">Mode<span class="ib"><button type="button" class="info" aria-label="More information">i</button><span class="tip" role="tooltip">The mode the box switches to when you start. You can change it again while running.</span></span></label><select id="sMode" aria-label="Box mode"></select></div>
     <div class="modes">
       <div class="mode">
-        <h3>Self drive</h3>
-        <p>After the ramp up, A and B each go up 1% every interval until they reach their maximum.</p>
+        <h3>Self drive<span class="ib"><button type="button" class="info" aria-label="More information">i</button><span class="tip" role="tooltip">After the ramp up, A and B each go up 1% every interval until they reach their maximum.</span></span></h3>
         <label class="inl">Every <span class="field sec"><input type="number" id="stepSec" min="10" max="900" step="10" value="120" inputmode="numeric" aria-label="Seconds between steps"><span class="u">sec</span></span></label>
         <button class="btn primary push" id="btnAuto">Start self drive</button>
       </div>
       <div class="mode">
-        <h3>Remote Drive</h3>
-        <p>Someone else moves A and B from a link you send, up to your maximums. You approve them first and can STOP at any time.</p>
+        <h3>Remote Drive<span class="ib"><button type="button" class="info" aria-label="More information">i</button><span class="tip" role="tooltip">Driver moves A and B from a link you send, up to your maximums. You approve them first and can STOP at any time.</span></span></h3>
         <label id="hostedRow" class="col hidden">Web address where this page is hosted
           <input type="text" id="hostedUrl" placeholder="https://example.com/et312-simple.html"></label>
         <button class="btn push" id="btnRemote">Start remote drive</button>
@@ -232,12 +266,13 @@
     </div>
 
     <div id="remotePanel" class="panel hidden">
+      <p class="status hidden" id="mqttRow">Home Assistant: <b id="mqttState">&ndash;</b></p>
       <p class="status">Send this link to your driver:</p>
       <div class="link" id="linkBox">&hellip;</div>
       <input type="text" id="noteIn" maxlength="40" placeholder="Note for your driver (optional)" aria-label="Note for your driver">
       <div class="row"><button class="btn sm" id="btnCopy">Copy link</button><span class="hint" style="margin:0" id="remoteState">waiting for them to open it</span></div>
       <div id="reqBox" class="req hidden">
-        <b>Someone opened the link.</b> Let them control?
+        <b>Driver opened the link.</b> Let them control?
         <div class="row" style="margin-top:10px"><button class="btn primary" id="btnAllow">Allow</button><button class="btn" id="btnRefuse">Refuse</button></div>
       </div>
       <div class="row" style="margin-top:10px"><button class="btn hidden" id="btnResume">Resume remote drive</button><button class="btn hidden" id="btnKick">Disconnect Driver</button></div>
@@ -258,7 +293,7 @@
 
 <!-- ================= CONTROLLER VIEW (the person with the link) ================= -->
 <div id="ctlView" class="hidden">
-  <div class="top"><h1>Remote Drive</h1></div>
+  <div class="top"><h1>Remote Drive<span class="ib"><button type="button" class="info" aria-label="More information">i</button><span class="tip" role="tooltip">Keep this page open and in front. If it loses contact for a few seconds, everything drops to zero. The Rider can stop or disconnect you at any time. The slider range is the Rider&rsquo;s maximum.</span></span></h1></div>
   <div id="ctlBanner" class="banner">Connecting&hellip;</div>
   <div id="ctlBody" class="hidden">
     <button class="stop" id="ctlStop">STOP</button>
@@ -271,9 +306,10 @@
       <input type="range" id="cSl_b" min="0" max="60" step="1" value="0" aria-label="Channel B">
       <div class="row"><span></span><span class="cbtns"><button class="btn" id="cDn_b">&#9660; 1%</button><button class="btn" id="cUp_b">&#9650; 1%</button></span></div></div>
     <div class="banner hidden" id="cNote" style="background:var(--card);border:1px solid var(--line);color:var(--ink)"></div>
+    <div class="cbox hidden" id="cSwBox"><div class="t"><span>Switches</span><span id="cSwInfo" style="font-weight:400;color:var(--muted);font-size:13px"></span></div>
+      <div class="swlist"><button type="button" class="hidden" id="cSw_0"></button><button type="button" class="hidden" id="cSw_1"></button><button type="button" class="hidden" id="cSw_2"></button><button type="button" class="hidden" id="cSw_3"></button><button type="button" class="hidden" id="cSw_4"></button><button type="button" class="hidden" id="cSw_5"></button></div></div>
     <div class="cbox hidden" id="cModeBox"><div class="t"><span>Mode</span><span id="cModeInfo" style="font-weight:400;color:var(--muted);font-size:13px"></span></div>
       <select id="cMode" aria-label="Mode"></select></div>
-    <p class="hint">Keep this page open and in front. If it loses contact for a few seconds, everything drops to zero. The Rider can stop or disconnect you at any time. The slider range is the Rider&rsquo;s maximum.</p>
   </div>
 </div>
 
@@ -290,7 +326,7 @@ const CH = ['a', 'b', 'm'];
 const NAME = { a: 'Channel A', b: 'Channel B', m: 'Multi-adjust' };
 /** The box's built-in programs ("modes") that can be switched by this page. n is the value the box keeps at $407b.
  *  Split (0x7f) and User 1-7 (0x88-0x8e) are left out: Split needs its own set-up, and User modes only exist if the owner has programmed them. */
-const BUILD = '2026-10-28.3';   // shown at the bottom of both pages; the Driver's page warns if it differs from the Rider's
+const BUILD = '2026-10-29.1';   // shown at the bottom of both pages; the Driver's page warns if it differs from the Rider's
 const MODES = [
   { n: 0x76, name: 'Waves' }, { n: 0x77, name: 'Stroke' }, { n: 0x78, name: 'Climb' }, { n: 0x79, name: 'Combo' },
   { n: 0x7a, name: 'Intense' }, { n: 0x7b, name: 'Rhythm' }, { n: 0x7c, name: 'Audio 1' }, { n: 0x7d, name: 'Audio 2' },
@@ -519,7 +555,7 @@ class Session {
     this.stepSec = 120; this.auto = { activeMs: 0, paused: false };
     this.remote = { connected: false, lastHb: 0, locked: false, lost: false };
     this._pumping = null; this._running = false; this._hold = false;
-    this.note = '';
+    this.note = ''; this.switches = null;          // optional Home Assistant switches (see Switches)
     this.boxMode = null; this._modeReq = null; this._lastModeChange = -1e9;   // the box's current mode (a number), a pending change, and the time of the last change
     this._last = 0; this._lastVerify = 0; this._verifyFails = 0; this._maWarned = false;
     this.faultInfo = null;
@@ -660,7 +696,9 @@ class Session {
   }
   /** Immediate zero for A and B (multi-adjust stays where it is). Safe in any state, any number of times.
    *  Auto mode: ends the climb. Remote mode: locks control until resumeRemote(). */
+  _safeSw(why) { try { if (this.switches) this.switches.safe(why); } catch (_) {} }
   stop(reason = 'STOP', { lock = true } = {}) {
+    this._safeSw(reason);
     for (const ch of ['a', 'b']) { this.level[ch] = 0; this.user[ch] = 0; this.offset[ch] = 0; }
     this.cmd = { a: 0, b: 0, m: this.cmd.m };
     if (this.mode === 'auto') { this.mode = 'none'; this.auto = { activeMs: 0, paused: false }; this.ramp = null; this.emit('mode', this.mode); }
@@ -677,7 +715,7 @@ class Session {
     this.user = { a: this.init.a, b: this.init.b }; this._beginRun();      // A and B ramp up to their start levels
     this.emit('remote', { connected: true });
   }
-  remoteDetach() { this.remote.connected = false; this.user = { a: 0, b: 0 }; this.emit('remote', { connected: false }); }
+  remoteDetach() { this._safeSw('Driver left'); this.remote.connected = false; this.user = { a: 0, b: 0 }; this.emit('remote', { connected: false }); }
   remoteSet(v) {
     if (this.state !== 'armed' || this.mode !== 'remote' || !this.remote.connected || this.remote.locked) return;
     for (const ch of ['a', 'b']) {                   // multi-adjust is never remote-controlled
@@ -724,7 +762,7 @@ class Session {
     const ramping = this._ramping(now);
     if (this.mode === 'auto' && !this.auto.paused && !ramping) this.auto.activeMs += dt * 1000;
     if (this.mode === 'remote' && this.remote.connected && !this.remote.lost && now - this.remote.lastHb > this.cfg.deadmanMs) {
-      this.remote.lost = true; this.user = { a: 0, b: 0 };
+      this.remote.lost = true; this.user = { a: 0, b: 0 }; this._safeSw('lost contact with the Driver');
       this.log('No signal from the controller for ' + Math.round(this.cfg.deadmanMs / 1000) + ' s: output ramping to zero.');
       this.emit('remote', { lost: true });
     }
@@ -833,7 +871,7 @@ class Session {
     for (const ch of ['a', 'b']) { this.level[ch] = 0; this.user[ch] = 0; }
     this.cmd = { a: 0, b: 0, m: this.cmd.m }; this._modeReq = null;
     this.setState('fault');
-    this.log('FAULT: ' + err.message);
+    this.log('FAULT: ' + err.message); this._safeSw('fault');
     let zero = false;
     for (let i = 0; i < 3 && !zero; i++) {
       try {
@@ -869,6 +907,41 @@ class Session {
 }
 
 /* ---------- remote host: talks to one controller over a PeerJS-style connection ---------- */
+/** Home Assistant switches: the Driver can ask for a switch to be turned on or off; this page publishes the MQTT message.
+ *  The Driver only ever names a switch id from the Rider's list - never a topic or a payload.
+ *  items: [{ id, name, topic, onPayload, offPayload }]. publish(topic, payload) returns true if the message was handed to the broker. */
+class Switches {
+  constructor(items, publish, opts = {}) {
+    this.items = items.map(i => ({ ...i })); this.publish = publish;
+    this.safeOff = opts.safeOff !== false; this.gapMs = opts.gapMs ?? 400; this.clock = opts.clock || (() => performance.now());
+    this.log = opts.log || (() => {}); this.onChange = () => {};
+    this.state = {}; this.owed = {}; this.last = {};      // state: what we last sent; owed: an OFF we still have to deliver
+  }
+  list() { return this.items.map(i => ({ id: i.id, name: i.name, on: this.state[i.id] === true })); }
+  set(id, on) {
+    const it = this.items.find(x => x.id === id); if (!it) return { ok: false, reason: 'unknown' };
+    on = on === true; const now = this.clock();
+    if (now - (this.last[id] ?? -1e9) < this.gapMs) return { ok: false, reason: 'too soon' };
+    if (!this.publish(it.topic, on ? it.onPayload : it.offPayload)) return { ok: false, reason: 'not connected' };
+    this.last[id] = now; this.state[id] = on; this.owed[id] = false;
+    this.log(it.name + ' turned ' + (on ? 'ON' : 'OFF') + ' (' + it.topic + ' = ' + (on ? it.onPayload : it.offPayload) + ').'); this.onChange();
+    return { ok: true };
+  }
+  /** Turn off everything that is on (or whose OFF is still owed). If the broker is not reachable the OFF is kept and retried. */
+  safe(why) {
+    if (!this.safeOff) return;
+    let did = false;
+    for (const it of this.items) {
+      if (this.state[it.id] !== true && !this.owed[it.id]) continue;
+      did = true;
+      if (this.publish(it.topic, it.offPayload)) { this.state[it.id] = false; this.owed[it.id] = false; this.log(it.name + ' turned OFF (' + why + ').'); }
+      else { this.owed[it.id] = true; this.log(it.name + ': could not send OFF (' + why + ') - will retry when the broker is back.'); }
+    }
+    if (did) this.onChange();
+  }
+  retryOwed() { if (this.items.some(i => this.owed[i.id])) this.safe('broker reconnected'); }
+}
+
 class RemoteHost {
   constructor(session, emit = () => {}) { this.s = session; this.emit = emit; this.conn = null; this.pending = null; }
   _send(conn, obj) {
@@ -892,7 +965,7 @@ class RemoteHost {
     if (!this.pending) return;
     this.conn = this.pending; this.pending = null;
     this.s.remoteAttach();
-    this._send(this.conn, { t: 'hello', max: { a: this.s.max.a, b: this.s.max.b }, init: { a: this.s.init.a, b: this.s.init.b }, driven: { a: this.s.driven('a'), b: this.s.driven('b'), m: false }, modes: this.s.allowedList(), mode: this.s.boxMode, note: String(this.s.note || '').slice(0, 40), ver: BUILD });
+    this._send(this.conn, { t: 'hello', max: { a: this.s.max.a, b: this.s.max.b }, init: { a: this.s.init.a, b: this.s.init.b }, driven: { a: this.s.driven('a'), b: this.s.driven('b'), m: false }, modes: this.s.allowedList(), mode: this.s.boxMode, note: String(this.s.note || '').slice(0, 40), ver: BUILD, sw: this.s.switches ? this.s.switches.list() : [] });
     this.emit('attached');
   }
   refuse() {
@@ -911,6 +984,11 @@ class RemoteHost {
     if (conn !== this.conn || !m || typeof m !== 'object') return;
     if (m.t === 'set') this.s.remoteSet(m);
     else if (m.t === 'stop') this.s.stop('Controller pressed STOP', { lock: false });
+    else if (m.t === 'sw') {
+      const s = this.s, id = String(m.id).slice(0, 8);
+      const r = !s.switches ? { ok: false, reason: 'none' } : (s.mode !== 'remote' || !s.remote.connected || s.remote.locked || s.remote.lost) ? { ok: false, reason: 'paused' } : s.switches.set(id, m.on === true);
+      this._send(conn, { t: 'swack', id, ok: r.ok, reason: r.reason || '' }); this.pushState();
+    }
     else if (m.t === 'mode') { const r = this.s.remoteMode(m.n); this._send(conn, { t: 'modeack', n: Number(m.n), ok: r.ok, reason: r.reason || '' }); }
   }
   _closed(conn) {
@@ -920,12 +998,12 @@ class RemoteHost {
   pushState() {
     if (!this.conn) return;
     const sn = this.s.snapshot(), p = ch => this.s.pctOf(ch, sn.cmd[ch]);
-    this._send(this.conn, { t: 'state', level: { a: p('a'), b: p('b') }, locked: sn.remote.locked, lost: sn.remote.lost, state: sn.state, mode: sn.boxMode, note: String(this.s.note || '').slice(0, 40) });
+    this._send(this.conn, { t: 'state', level: { a: p('a'), b: p('b') }, locked: sn.remote.locked, lost: sn.remote.lost, state: sn.state, mode: sn.boxMode, note: String(this.s.note || '').slice(0, 40), sw: this.s.switches ? this.s.switches.list() : [] });
   }
   shutdown() { for (const c of [this.conn, this.pending]) { if (c) { try { c.close(); } catch (_) {} } } this.conn = null; this.pending = null; }
 }
 
-return { ADDR, CH, NAME, MODES, BUILD, modeName, ET312, ET312Error, ByteQueue, SimBox, SimTransport, WebSerialTransport, Session, RemoteHost,
+return { ADDR, CH, NAME, MODES, BUILD, Switches, modeName, ET312, ET312Error, ByteQueue, SimBox, SimTransport, WebSerialTransport, Session, RemoteHost,
          slew, sum8, swapNibbles, clamp, sleep, hex, randId };
 })();
 </script>
@@ -936,8 +1014,24 @@ return { ADDR, CH, NAME, MODES, BUILD, modeName, ET312, ET312Error, ByteQueue, S
 const $ = id => document.getElementById(id);
 const show = (id, on) => $(id).classList.toggle('hidden', !on);
 const CH = ET.CH, AB = ['a', 'b'];
+const MQTT_URLS = ['https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js', 'https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js'];
 const PEER_URLS = ['https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js', 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js'];
 
+function loadMqtt() {
+  return new Promise((resolve, reject) => {
+    if (window.mqtt) return resolve();
+    let i = 0;
+    const next = () => {
+      if (i >= MQTT_URLS.length) return reject(new Error('Could not load the MQTT library (are you online?)'));
+      const s = document.createElement('script');
+      s.src = MQTT_URLS[i++];
+      s.onload = () => (window.mqtt ? resolve() : next());
+      s.onerror = next;
+      document.head.appendChild(s);
+    };
+    next();
+  });
+}
 function loadPeerJS() {
   return new Promise((resolve, reject) => {
     if (window.Peer) return resolve();
@@ -995,7 +1089,7 @@ function hostView() {
       session = null; setConn('not connected', ''); return;
     }
     const i = session.info, names = ['Low', 'Normal', 'High'];
-    $('infoLine').textContent = 'Connected. Box model 0x' + i.model.toString(16).padStart(2, '0') + ', firmware ' + i.fw.join('.') + ', power level ' + (names[i.power] || i.power) + '.';
+    $('infoLine').textContent = 'Connected. Box model 0x' + i.model.toString(16).padStart(2, '0') + ', firmware ' + i.fw.join('.') + ', power level ' + (names[i.power] || i.power) + '.'; show('infoLine', true);
     if (i.model !== 0x0c) banner('noteBanner', '<b>This does not look like an ET312</b> (model byte 0x' + i.model.toString(16) + '). Arming is blocked.');
     else if (i.knobsDisabled) banner('noteBanner', '<b>The knobs are currently disabled on the box</b> (an earlier session left it held at zero). It still works with this page; switch the box off and on to get the knobs back later.');
     else if (!(i.fw[0] === 1 && (i.fw[1] === 5 || i.fw[1] === 6))) banner('noteBanner', '<b>Unusual firmware ' + i.fw.join('.') + '.</b> The memory map used here is documented for 1.5 and 1.6. Every write is read back and checked, but go carefully.');
@@ -1017,6 +1111,79 @@ function hostView() {
   };
   $('btnDisconnect').onclick = async () => { if (!session) return; stopTimers(); if (host) host.shutdown(); await session.shutdown(); };
 
+  /* ----- Home Assistant switches (MQTT over WebSocket) ----- */
+  const SW_N = 6, HA_KEY = 'et312-ha', HA_PASS = 'et312-ha-pass';
+  const SW_DEFAULT = [['Switch 1', 'pp1'], ['Switch 2', 'pp2'], ['Switch 3', 'pp3']];
+  let mq = null, haItems = null;
+  const payOf = i => ($('swPay_' + i).value === 'OPEN' ? 'OPEN' : 'CLOSE');
+  function haLoad() {
+    let d = null; try { d = JSON.parse(store.get(HA_KEY) || 'null'); } catch (_) {}
+    for (let i = 0; i < SW_N; i++) {
+      const r = (d && d.rows && d.rows[i]) || (!d && SW_DEFAULT[i] ? { on: true, name: SW_DEFAULT[i][0], topic: SW_DEFAULT[i][1], pay: 'CLOSE' } : { on: false, name: '', topic: '', pay: 'CLOSE' });
+      $('swOn_' + i).checked = !!r.on; $('swName_' + i).value = r.name || ''; $('swTopic_' + i).value = r.topic || ''; $('swPay_' + i).value = r.pay === 'OPEN' ? 'OPEN' : 'CLOSE';
+    }
+    if (d) { if (d.url) $('mqttUrl').value = d.url; if (typeof d.prefix === 'string') $('mqttPrefix').value = d.prefix; $('mqttUser').value = d.user || ''; $('swSafe').checked = d.safe !== false; }
+    const pw = store.get(HA_PASS); if (pw) { $('mqttPass').value = pw; $('mqttSave').checked = true; }
+  }
+  function haSave() {
+    const rows = []; for (let i = 0; i < SW_N; i++) rows.push({ on: $('swOn_' + i).checked, name: $('swName_' + i).value, topic: $('swTopic_' + i).value, pay: payOf(i) });
+    store.set(HA_KEY, JSON.stringify({ url: $('mqttUrl').value, prefix: $('mqttPrefix').value, user: $('mqttUser').value, safe: $('swSafe').checked, rows }));
+    store.set(HA_PASS, $('mqttSave').checked ? $('mqttPass').value : '');
+  }
+  const cleanName = t => String(t).replace(/[<>&"'`]/g, '').trim().slice(0, 20);
+  function haRead() {                   // -> { items } or { error }
+    const prefix = $('mqttPrefix').value.trim(), items = [];
+    if (!/^[A-Za-z0-9_\-\/]{0,60}$/.test(prefix)) return { error: 'The topic start may only contain letters, numbers, - _ and /.' };
+    for (let i = 0; i < SW_N; i++) {
+      if (!$('swOn_' + i).checked) continue;
+      const end = $('swTopic_' + i).value.trim(), name = cleanName($('swName_' + i).value);
+      if (!name) return { error: 'Home Assistant switch ' + (i + 1) + ' needs a button label (or untick it).' };
+      if (!/^[A-Za-z0-9_\-\/]{1,60}$/.test(end)) return { error: 'Home Assistant switch ' + (i + 1) + ': the topic end may only contain letters, numbers, - _ and /.' };
+      const on = payOf(i);
+      items.push({ id: 's' + i, name, topic: prefix + end, onPayload: on, offPayload: on === 'CLOSE' ? 'OPEN' : 'CLOSE' });
+    }
+    return { items };
+  }
+  const haPublish = (topic, payload) => {
+    if (!mq || !mq.connected) return false;
+    try { mq.publish(topic, payload, { qos: 1, retain: false }, err => { if (err) log('MQTT publish error: ' + err.message); }); return true; } catch (e) { log('MQTT publish error: ' + e.message); return false; }
+  };
+  async function haConnect(setStatus) {      // resolves once connected; rejects with a readable message
+    const url = $('mqttUrl').value.trim();
+    if (!/^wss?:\/\//.test(url)) throw new Error('The broker address must start with ws:// (or wss://).');
+    if (typeof location !== 'undefined' && location.protocol === 'https:' && /^ws:\/\//.test(url)) throw new Error('This page was opened from a secure (https) address, so the browser blocks a plain ws:// connection. Open your own local copy of the page instead.');
+    await loadMqtt();
+    return new Promise((resolve, reject) => {
+      let done = false, client;
+      const fail = m => { if (!done) { done = true; reject(new Error(m)); } };
+      try { client = window.mqtt.connect(url, { username: $('mqttUser').value || undefined, password: $('mqttPass').value || undefined, clientId: 'et312-' + ET.randId(), reconnectPeriod: 3000, connectTimeout: 8000, clean: true, queueQoSZero: false }); }
+      catch (e) { return fail(e.message); }
+      mq = client;
+      client.on('connect', () => { setStatus('connected'); if (haItems) haItems.retryOwed(); if (!done) { done = true; resolve(client); } });
+      client.on('reconnect', () => setStatus('reconnecting…'));
+      client.on('offline', () => setStatus('offline, retrying…'));
+      client.on('close', () => { if (done) setStatus('disconnected, retrying…'); });
+      client.on('error', e => { const m = String(e && e.message || e); setStatus('problem: ' + m); fail(/not authori|bad user|refused/i.test(m) ? 'The broker refused the login (check the username and password).' : m); });
+      setTimeout(() => fail('No answer from the broker within 8 seconds. Check the address, the port (1884) and the firewall rule.'), 8500);
+    });
+  }
+  function haStop() { const c = mq; mq = null; haItems = null; if (c) { try { c.end(false); } catch (_) {} } show('mqttRow', false); }
+  $('mqttTest').onclick = async () => {
+    const st = $('mqttStatus'); st.textContent = 'testing…'; haSave();
+    try { await haConnect(() => {}); st.textContent = 'Connected OK. Nothing was sent.'; }
+    catch (e) { st.textContent = e.message; }
+    const c = mq; mq = null; if (c) { try { c.end(true); } catch (_) {} }
+  };
+  async function haStart(items) {      // called when a remote drive starts; never blocks or breaks the box session
+    haItems = new ET.Switches(items, haPublish, { safeOff: $('swSafe').checked, log });
+    haItems.onChange = () => host && host.pushState();
+    session.switches = haItems; show('mqttRow', true); $('mqttState').textContent = 'connecting…';
+    try { await haConnect(t => { if (haItems) $('mqttState').textContent = t; }); }
+    catch (e) { if (haItems) $('mqttState').textContent = 'NOT connected — ' + e.message; log('Home Assistant: ' + e.message); }
+  }
+  haLoad();
+  window.addEventListener('beforeunload', () => { try { if (session) session._safeSw('page closed'); } catch (_) {} });
+
   /* ----- settings and starting a run ----- */
   function checkSettings() {            // returns the validated settings, or null after saying why
     banner('noteBanner', '');
@@ -1031,9 +1198,9 @@ function hostView() {
     return 'Start: A ' + s.init.a + '%, B ' + s.init.b + '%, multi-adjust ' + (s.init.m === null ? 'left alone' : s.init.m + '% straight away') +
       '\nRamp up: ' + s.rampSec + ' s\nMaximum: A ' + s.max.a + '%, B ' + s.max.b + '%';
   }
-  function confirmStart(label) {
+  function confirmStart(label, extra = '') {
     const s = checkSettings(); if (!s) return false;
-    return confirm(label + '\n\n' + describe(s) + '\n\nIf this page or the PC fails, the box keeps its last level — switch the box off.');
+    return confirm(label + '\n\n' + describe(s) + extra + '\n\nIf this page or the PC fails, the box keeps its last level — switch the box off.');
   }
   async function takeControl() {          // the only step that changes the box
     try { if (session.state === 'armed') await session.reconfigure(); else await session.arm(); }
@@ -1067,7 +1234,9 @@ function hostView() {
     let base = '';
     if (isFile) { base = $('hostedUrl').value.trim(); if (!/^https?:\/\//.test(base)) { banner('noteBanner', 'For remote drive, this page has to be hosted at a web address so the other person can open it. Put the page somewhere (see the note I gave you), then paste its address into the box in the Remote control panel.'); return; } store.set('et312-hosted', base); }
     else base = location.href.split('#')[0];
-    if (!confirmStart('Start remote drive')) return;
+    const ha = haRead(); if (ha.error) { banner('noteBanner', '<b>Check the Home Assistant switches.</b> ' + ha.error); return; }
+    haSave();
+    if (!confirmStart('Start remote drive', ha.items.length ? '\nHome Assistant switches the Driver can use: ' + ha.items.map(i => i.name).join(', ') : '')) return;
     // get the internet side working first, so a network problem never leaves the box under software control for nothing
     try { await loadPeerJS(); }
     catch (e) { banner('faultBanner', e.message + ' Nothing was changed on the box.'); return; }
@@ -1080,6 +1249,7 @@ function hostView() {
     peer.on('error', er => log('Peer error: ' + (er.type || er.message)));
     session.startRemote();
     host = new ET.RemoteHost(session, onRemoteEvent);
+    if (ha.items.length) haStart(ha.items);
     peer.on('connection', c => host.accept(c));
     linkText = base.split('#')[0] + '#c=' + id;
     $('linkBox').textContent = linkText; session.note = String($('noteIn').value).slice(0, 40);
@@ -1126,7 +1296,7 @@ function hostView() {
     if (pushTimer) { clearInterval(pushTimer); pushTimer = null; }
     if (host) { host.shutdown(); host = null; } if (peer) { try { peer.destroy(); } catch (_) {} peer = null; }
     session.backToSetup();                    // zero; the box stays under our control, held at zero, and keeps being checked
-    show('cardLive', false); show('cardConnect', true); showSetup(true); show('remotePanel', false); show('autoPanel', false); show('reqBox', false);
+    haStop(); show('cardLive', false); show('cardConnect', true); showSetup(true); show('remotePanel', false); show('autoPanel', false); show('reqBox', false);
     banner('noteBanner', 'Session ended. The box is held at zero. Change the settings if you like and start another run.');
     setConn('connected, held at zero', 'ok');
   };
@@ -1188,7 +1358,7 @@ function hostView() {
     } else if (s.mode === 'none') $('autoCount').textContent = 'Stopped';
   }
   function onFault(d) {
-    stopTimers(); if (host) host.shutdown();
+    stopTimers(); if (host) host.shutdown(); haStop();
     banner('faultBanner', d.zeroConfirmed
       ? '<b>Fault: ' + d.reason + '</b><br>The box was told to go to zero and the readback confirms A=0, B=0. Switch it off and on before reconnecting.'
       : '<b>FAULT — COULD NOT CONFIRM THE OUTPUT IS ZERO.</b><br>' + d.reason + '<br><b>Switch the box off now</b> (or remove the electrodes).');
@@ -1197,12 +1367,12 @@ function hostView() {
     show('cardConnect', true); show('btnConnect', true); show('btnSim', simOK); show('btnDisconnect', false); showSetup(false); setReady(false);
   }
   function onClosed(d) {
-    stopTimers(); if (simTimer) { clearInterval(simTimer); simTimer = null; }
+    haStop(); stopTimers(); if (simTimer) { clearInterval(simTimer); simTimer = null; }
     if (peer) { try { peer.destroy(); } catch (_) {} peer = null; } host = null;
     show('cardLive', false); show('cardConnect', true); showSetup(true); setReady(false); show('remotePanel', false); show('autoPanel', false);
     show('btnConnect', true); show('btnSim', simOK); show('btnDisconnect', false);
     $('btnStop').disabled = false;
-    setConn('not connected', '');
+    setConn('not connected', ''); show('infoLine', false);
     if (d.held) banner('noteBanner', d.zeroConfirmed ? 'Disconnected. The box is <b>held at zero</b> with its knobs disabled. Switch it off and on to use the knobs again.' : '<b>Disconnected, but zero could not be confirmed.</b> Switch the box off.');
     session = null;
   }
@@ -1244,6 +1414,16 @@ function controllerView(id) {
   let verWarn = '';
   function showNote(n) { const t = typeof n === 'string' ? n.slice(0, 40) : ''; $('cNote').textContent = (verWarn ? verWarn + ' ' : '') + (t ? 'Note from your Rider: ' + t : ''); show('cNote', !!(t || verWarn)); }
   const clean = t => String(t).replace(/[<>&"']/g, '').slice(0, 24);
+  let sws = [];
+  function renderSw() {
+    for (let i = 0; i < 6; i++) { const el = $('cSw_' + i), x = sws[i]; if (x) { el.textContent = x.name + ' · ' + (x.on ? 'ON' : 'OFF'); el.classList.toggle('on', x.on); } show('cSw_' + i, !!x); }
+    show('cSwBox', sws.length > 0);
+  }
+  function fillSw(list) {
+    sws = Array.isArray(list) ? list.filter(x => x && typeof x.id === 'string' && typeof x.name === 'string').slice(0, 6).map(x => ({ id: x.id.slice(0, 8), name: clean(x.name), on: x.on === true })) : [];
+    renderSw();
+  }
+  for (let i = 0; i < 6; i++) $('cSw_' + i).onclick = () => { const x = sws[i]; if (!x) return; $('cSwInfo').textContent = ''; send({ t: 'sw', id: x.id, on: !x.on }); };
   function fillModes(list) {
     modes = Array.isArray(list) ? list.filter(x => x && Number.isFinite(+x.n) && typeof x.name === 'string').map(x => ({ n: +x.n, name: clean(x.name) })) : [];
     $('cMode').innerHTML = '<option value="">choose a mode…</option>' + modes.map(x => '<option value="' + x.n + '">' + x.name + '</option>').join('');
@@ -1287,14 +1467,16 @@ function controllerView(id) {
           const ini = Object.assign({ a: 0, b: 0 }, m.init);
           for (const ch of AB) { show('cRow_' + ch, !!driven[ch]); $('cSl_' + ch).max = maxP[ch]; $('cInfo_' + ch).textContent = 'Rider\'s maximum ' + maxP[ch] + '%'; val[ch] = ET.clamp(Math.round(ini[ch]), 0, maxP[ch]); }
           verWarn = (m.ver && m.ver !== ET.BUILD) ? 'This page is a different version from the Rider\'s — refresh it (Ctrl+F5, or open the link in a private window).' : (!m.ver ? 'This page may be out of date — refresh it (Ctrl+F5).' : '');
-          fillModes(m.modes); showMode(m.mode); showNote(m.note);
+          fillModes(m.modes); showMode(m.mode); showNote(m.note); fillSw(m.sw);
           render(); live = true; last = Date.now(); show('ctlBody', true); show('ctlBanner', false); push();
         } else if (m.t === 'state') {
           if (m.lost) say('Rider has lost contact with you — output is at zero. Move a slider to continue.', true);
           else if (m.locked) say('The Rider pressed STOP. Waiting for them to resume.', true);
           else show('ctlBanner', false);
           if (m.locked || m.lost) zeroAll();
-          showMode(m.mode); showNote(m.note);
+          showMode(m.mode); showNote(m.note); fillSw(m.sw);
+        } else if (m.t === 'swack') {
+          if (!m.ok) $('cSwInfo').textContent = ({ 'too soon': 'too soon — wait a moment', 'paused': 'the Rider has paused control', 'not connected': 'not available right now', 'none': 'not available' })[m.reason] || 'not changed';
         } else if (m.t === 'modeack') {
           if (!m.ok) $('cModeInfo').textContent = ({ 'too soon': 'too soon — wait a moment', 'not allowed': 'the Rider has not allowed that mode', 'paused': 'the Rider has paused control', 'not running': 'not running' })[m.reason] || 'not changed';
         }
